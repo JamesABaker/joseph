@@ -200,14 +200,9 @@ ports:
   - "8001:8000"  # Change 8001 to any available port
 ```
 
-### Memory Issues
-
-If you encounter OOM errors, increase Docker's memory limit to at least 2GB in Docker Desktop settings.
-
 ## Future Enhancements
 
 - [ ] Batch processing API endpoint
-- [ ] Support for multiple languages
 - [ ] Confidence threshold settings
 - [ ] Text highlighting for AI-likely sections
 - [ ] Export results to PDF/CSV

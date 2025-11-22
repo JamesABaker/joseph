@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Text Detector</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@300;400;700&family=Cutive+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cutive+Mono&family=Libre+Baskerville:ital@1&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -34,13 +35,19 @@
         }
 
         h1 {
-            font-family: 'Averia Serif Libre', serif;
+            font-family: 'Bebas Neue', sans-serif;
             color: #000;
             margin-bottom: 10px;
-            font-size: 3em;
-            font-weight: 700;
+            font-size: 4em;
+            font-weight: 400;
             text-align: center;
-            letter-spacing: -2px;
+            letter-spacing: 2px;
+        }
+
+        .f-italic {
+            font-family: 'Libre Baskerville', serif;
+            font-style: italic;
+            font-size: 1.2em;
         }
 
         .subtitle {
@@ -87,8 +94,8 @@
         }
 
         .detect-btn {
-            background: #000;
-            color: #fff;
+            background: #ff69b4;
+            color: #000;
         }
 
         .detect-btn:hover:not(:disabled) {
@@ -139,9 +146,10 @@
 
         .result h2 {
             margin-bottom: 15px;
-            font-size: 1.5em;
-            font-family: 'Averia Serif Libre', serif;
+            font-size: 2em;
+            font-family: 'Bebas Neue', sans-serif;
             color: #000;
+            letter-spacing: 1px;
         }
 
         .probabilities {
@@ -159,10 +167,11 @@
         }
 
         .metrics h3 {
-            font-size: 1em;
+            font-size: 1.2em;
             margin-bottom: 10px;
             color: #000;
-            font-family: 'Averia Serif Libre', serif;
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 1px;
         }
 
         .metric-grid {
@@ -205,9 +214,10 @@
         }
 
         .prob-value {
-            font-size: 2.5em;
+            font-size: 3em;
             font-weight: 400;
-            font-family: 'Averia Serif Libre', serif;
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
         }
 
         .result.human .prob-value.human {
@@ -244,8 +254,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .footer {
@@ -265,17 +280,16 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>🤖 AI Text Detector</h1>
+        <h1>Veri<span class="f-italic">f</span></h1>
         <p class="subtitle">Ensemble Analysis for robust AI detection</p>
 
-        <textarea
-            id="textInput"
+        <textarea id="textInput"
             placeholder="Paste or type text here to analyze...
 
-Example: The rapid advancement of artificial intelligence has transformed numerous industries, from healthcare to finance. Machine learning algorithms can now process vast amounts of data with unprecedented accuracy."
-        ></textarea>
+Example: The rapid advancement of artificial intelligence has transformed numerous industries, from healthcare to finance. Machine learning algorithms can now process vast amounts of data with unprecedented accuracy."></textarea>
 
         <div class="button-container">
             <button class="detect-btn" id="detectBtn" onclick="detectText()">
@@ -333,13 +347,26 @@ Example: The rapid advancement of artificial intelligence has transformed numero
                         <div class="metric-label">Lexical Diversity</div>
                         <div class="metric-value" id="lexicalDiversity">0</div>
                     </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Word Length Var</div>
+                        <div class="metric-value" id="wordLengthVar">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Punct Diversity</div>
+                        <div class="metric-value" id="punctDiversity">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Vocab Richness</div>
+                        <div class="metric-value" id="vocabRichness">0</div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>Powered by <a href="https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta" target="_blank">RoBERTa</a> + Entropy Analysis</p>
-            <p>Hybrid detection combining ML with information theory</p>
+            <p>Powered by <a href="https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta"
+                    target="_blank">RoBERTa</a> + Entropy Analysis</p>
+            <p>🤖 Hybrid detection combining ML with information theory</p>
         </div>
     </div>
 
@@ -404,6 +431,9 @@ Example: The rapid advancement of artificial intelligence has transformed numero
             document.getElementById('burstiness').textContent = data.burstiness.toFixed(3);
             document.getElementById('shannonEntropy').textContent = data.shannon_entropy.toFixed(3);
             document.getElementById('lexicalDiversity').textContent = data.lexical_diversity.toFixed(3);
+            document.getElementById('wordLengthVar').textContent = data.word_length_variance.toFixed(3);
+            document.getElementById('punctDiversity').textContent = data.punctuation_diversity.toFixed(3);
+            document.getElementById('vocabRichness').textContent = data.vocabulary_richness.toFixed(3);
 
             // Set result class and title
             resultDiv.className = 'result ' + data.prediction;
@@ -431,11 +461,12 @@ Example: The rapid advancement of artificial intelligence has transformed numero
         }
 
         // Allow Enter + Ctrl/Cmd to submit
-        document.getElementById('textInput').addEventListener('keydown', function(e) {
+        document.getElementById('textInput').addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 detectText();
             }
         });
     </script>
 </body>
+
 </html>

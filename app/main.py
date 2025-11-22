@@ -58,6 +58,9 @@ class DetectionResponse(BaseModel):
     shannon_entropy: float = Field(..., description="Shannon entropy of text")
     burstiness: float = Field(..., description="Sentence complexity variation (0-1)")
     lexical_diversity: float = Field(..., description="Unique word ratio (0-1)")
+    word_length_variance: float = Field(..., description="Word length variance (0-1)")
+    punctuation_diversity: float = Field(..., description="Punctuation diversity (0-1)")
+    vocabulary_richness: float = Field(..., description="Vocabulary richness (0-1)")
     entropy_ai_probability: float = Field(..., description="Entropy-based AI probability")
     entropy_human_probability: float = Field(..., description="Entropy-based human probability")
 

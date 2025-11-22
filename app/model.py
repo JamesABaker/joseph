@@ -63,8 +63,9 @@ class AIDetector:
         entropy_results = self.entropy_detector.detect(text)
 
         # Hybrid score: weighted combination of ML and entropy
-        # ML model gets 60% weight, entropy features get 40%
-        hybrid_ai_prob = 0.6 * ml_ai_prob + 0.4 * entropy_results["ai_probability_entropy"]
+        # Entropy features get 80% weight (more reliable for modern LLMs)
+        # ML model gets 20% weight (trained on old GPT-2 era data)
+        hybrid_ai_prob = 0.2 * ml_ai_prob + 0.8 * entropy_results["ai_probability_entropy"]
         hybrid_human_prob = 100 - hybrid_ai_prob
 
         prediction = "ai" if hybrid_ai_prob > 50 else "human"
@@ -82,6 +83,9 @@ class AIDetector:
             "shannon_entropy": entropy_results["shannon_entropy"],
             "burstiness": entropy_results["burstiness"],
             "lexical_diversity": entropy_results["lexical_diversity"],
+            "word_length_variance": entropy_results["word_length_variance"],
+            "punctuation_diversity": entropy_results["punctuation_diversity"],
+            "vocabulary_richness": entropy_results["vocabulary_richness"],
             # Individual entropy-based probability
             "entropy_ai_probability": entropy_results["ai_probability_entropy"],
             "entropy_human_probability": entropy_results["human_probability_entropy"],
