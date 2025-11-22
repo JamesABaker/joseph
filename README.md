@@ -3,10 +3,13 @@
 [![Docker Build](https://github.com/JamesABaker/verif/actions/workflows/docker.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/docker.yml)
 [![pre-commit](https://github.com/JamesABaker/verif/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/pre-commit.yml)
 
-A Docker-based web application that detects whether text is AI-generated or human-written using a [RoBERTa model](https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta) trained specifically on ChatGPT output.
+A hybrid AI text detection system combining machine learning with information theory. Uses RoBERTa ML classifier + entropy-based analysis (perplexity, burstiness, Shannon entropy) for robust detection of AI-generated text.
 
 ## Features
 
+- 🧠 **Hybrid Detection** - combines ML model with entropy analysis for better accuracy
+- 📊 **Information Theory** - perplexity, Shannon entropy, burstiness, lexical diversity
+- 🎯 **Robust Against Modern LLMs** - entropy features work on GPT-4/GPT-5 output
 - 🐳 **Fully containerized** - runs anywhere with Docker
 - 🌐 **Web UI + REST API** - easy to use, easy to integrate
 - 🚀 **Fast inference** - results in seconds
@@ -138,9 +141,15 @@ verif/
 
 ## Model Information
 
-- **Model**: [Hello-SimpleAI/chatgpt-detector-roberta](https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta)
-- **Architecture**: RoBERTa-base
-- **Training Focus**: ChatGPT-generated text detection
+- **ML Model**: [Hello-SimpleAI/chatgpt-detector-roberta](https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta)
+- **Architecture**: Hybrid - RoBERTa + Entropy Analysis
+- **ML Component**: RoBERTa-base trained on ChatGPT output
+- **Entropy Features**:
+  - **Perplexity**: Measures text predictability (lower = more AI-like)
+  - **Shannon Entropy**: Character-level randomness measure
+  - **Burstiness**: Sentence complexity variation (human writing varies more)
+  - **Lexical Diversity**: Unique word ratio (type-token ratio)
+- **Scoring**: 60% ML model + 40% entropy features
 - **Max Input Length**: 512 tokens
 
 ## Technical Details
@@ -149,7 +158,9 @@ verif/
 
 - **Backend**: FastAPI (Python 3.11)
 - **ML Framework**: PyTorch + Transformers
-- **Model**: RoBERTa-base (ChatGPT detector)
+- **ML Model**: RoBERTa-base (ChatGPT detector)
+- **Perplexity Model**: GPT-2 (for entropy calculation)
+- **Entropy Analysis**: NumPy for statistical metrics
 - **Container**: Docker with multi-stage build
 - **Frontend**: Vanilla HTML/CSS/JavaScript
 
@@ -209,9 +220,11 @@ MIT License - feel free to use this project for learning, development, or produc
 
 ## Acknowledgments
 
-- Model: [ChatGPT Detector RoBERTa](https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta) by Hello-SimpleAI
+- ML Model: [ChatGPT Detector RoBERTa](https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta) by Hello-SimpleAI
+- Perplexity Analysis: GPT-2 by OpenAI
 - Built with [FastAPI](https://fastapi.tiangolo.com/)
 - Powered by [Hugging Face Transformers](https://huggingface.co/transformers/)
+- Entropy-based detection inspired by information theory research
 
 ## Contributing
 
