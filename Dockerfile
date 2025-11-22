@@ -17,6 +17,11 @@ COPY app/ ./app/
 # Activate environment and set path
 ENV PATH=/opt/conda/envs/verif/bin:$PATH
 
+# Pre-download the model during build to avoid startup delays
+RUN python -c "from transformers import AutoTokenizer, AutoModelForSequenceClassification; \
+    AutoTokenizer.from_pretrained('Hello-SimpleAI/chatgpt-detector-roberta'); \
+    AutoModelForSequenceClassification.from_pretrained('Hello-SimpleAI/chatgpt-detector-roberta')"
+
 # Expose port
 EXPOSE 8000
 

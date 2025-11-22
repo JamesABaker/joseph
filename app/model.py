@@ -6,7 +6,7 @@ import logging
 from typing import Any, Dict
 
 import torch
-from transformers import BertForSequenceClassification, BertTokenizer
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class AIDetector:
     """Wrapper for the BERT AI detection model."""
 
-    def __init__(self, model_name: str = "followsci/bert-ai-text-detector"):
+    def __init__(self, model_name: str = "Hello-SimpleAI/chatgpt-detector-roberta"):
         """
         Initialize the AI detector model.
 
@@ -23,8 +23,8 @@ class AIDetector:
         """
         logger.info(f"Loading model: {model_name}")
         self.model_name = model_name
-        self.tokenizer = BertTokenizer.from_pretrained(model_name)
-        self.model = BertForSequenceClassification.from_pretrained(model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
         self.model.eval()  # Set to evaluation mode
         logger.info("Model loaded successfully")
 
@@ -73,7 +73,7 @@ class AIDetector:
         """Get information about the loaded model."""
         info: Dict[str, Any] = {
             "model_name": self.model_name,
-            "architecture": "BERT-base-uncased",
+            "architecture": "RoBERTa-base",
             "max_length": 512,
             "labels": {"0": "Human-written", "1": "AI-generated"},
         }

@@ -7,6 +7,7 @@ dependencies:
   - python=3.11
   - pytorch::pytorch=2.1.2
   - pytorch::cpuonly
+  - numpy<2
   - conda-forge::transformers=4.36.2
   - conda-forge::fastapi=0.109.0
   - conda-forge::uvicorn=0.27.0

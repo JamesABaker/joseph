@@ -1,10 +1,12 @@
 # verif
 
-A Docker-based web application that detects whether text is AI-generated or human-written using the [Open-Detector BERT model](https://huggingface.co/followsci/bert-ai-text-detector).
+[![Docker Build](https://github.com/JamesABaker/verif/actions/workflows/docker.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/docker.yml)
+[![pre-commit](https://github.com/JamesABaker/verif/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/pre-commit.yml)
+
+A Docker-based web application that detects whether text is AI-generated or human-written using a [RoBERTa model](https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta) trained specifically on ChatGPT output.
 
 ## Features
 
-- 🎯 **99.57% accuracy** on academic text detection
 - 🐳 **Fully containerized** - runs anywhere with Docker
 - 🌐 **Web UI + REST API** - easy to use, easy to integrate
 - 🚀 **Fast inference** - results in seconds
@@ -136,13 +138,9 @@ verif/
 
 ## Model Information
 
-- **Model**: [followsci/bert-ai-text-detector](https://huggingface.co/followsci/bert-ai-text-detector)
-- **Architecture**: BERT-base-uncased
-- **Training Data**: ~1.4 million samples
-- **Accuracy**: 99.57%
-- **F1-Score**: 99.58%
-- **False Positive Rate**: 0.82%
-- **Recall**: 99.94%
+- **Model**: [Hello-SimpleAI/chatgpt-detector-roberta](https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta)
+- **Architecture**: RoBERTa-base
+- **Training Focus**: ChatGPT-generated text detection
 - **Max Input Length**: 512 tokens
 
 ## Technical Details
@@ -151,7 +149,7 @@ verif/
 
 - **Backend**: FastAPI (Python 3.11)
 - **ML Framework**: PyTorch + Transformers
-- **Model**: BERT-base-uncased
+- **Model**: RoBERTa-base (ChatGPT detector)
 - **Container**: Docker with multi-stage build
 - **Frontend**: Vanilla HTML/CSS/JavaScript
 
@@ -211,7 +209,7 @@ MIT License - feel free to use this project for learning, development, or produc
 
 ## Acknowledgments
 
-- Model: [Open-Detector](https://huggingface.co/followsci/bert-ai-text-detector) by followsci
+- Model: [ChatGPT Detector RoBERTa](https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta) by Hello-SimpleAI
 - Built with [FastAPI](https://fastapi.tiangolo.com/)
 - Powered by [Hugging Face Transformers](https://huggingface.co/transformers/)
 
