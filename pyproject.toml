@@ -1,0 +1,11 @@
+[tool.bandit]
+exclude_dirs = ["/test", "/tests"]
+skips = ["B101"]
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+line_length = 100

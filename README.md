@@ -1,0 +1,228 @@
+# verif
+
+A Docker-based web application that detects whether text is AI-generated or human-written using the [Open-Detector BERT model](https://huggingface.co/followsci/bert-ai-text-detector).
+
+## Features
+
+- 🎯 **99.57% accuracy** on academic text detection
+- 🐳 **Fully containerized** - runs anywhere with Docker
+- 🌐 **Web UI + REST API** - easy to use, easy to integrate
+- 🚀 **Fast inference** - results in seconds
+- 💾 **Model caching** - downloads once, runs forever
+- 🔒 **Privacy-first** - runs completely locally, no external API calls
+
+## Quick Start
+
+### Prerequisites
+
+- Docker and Docker Compose installed
+- 2GB free disk space (for model download)
+
+### Run with Docker Compose (Recommended)
+
+```bash
+# Clone or navigate to the project directory
+cd verif
+
+# Start the application
+docker-compose up
+
+# Or run in detached mode
+docker-compose up -d
+```
+
+The application will be available at:
+- **Web UI**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
+
+### Run with Docker (Manual)
+
+```bash
+# Build the image
+docker build -t verif .
+
+# Run the container
+docker run -p 8000:8000 -v model-cache:/root/.cache/huggingface verif
+```
+
+## Usage
+
+### Web Interface
+
+1. Open http://localhost:8000 in your browser
+2. Paste or type text into the textarea
+3. Click "Detect AI"
+4. View the results showing human vs. AI probabilities
+
+### REST API
+
+**Detect Text:**
+```bash
+curl -X POST http://localhost:8000/api/detect \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Your text to analyze here..."}'
+```
+
+**Response:**
+```json
+{
+  "human_probability": 45.3,
+  "ai_probability": 54.7,
+  "prediction": "ai",
+  "text_length": 123
+}
+```
+
+**Get Model Info:**
+```bash
+curl http://localhost:8000/api/model-info
+```
+
+**Health Check:**
+```bash
+curl http://localhost:8000/health
+```
+
+### Interactive API Documentation
+
+Visit http://localhost:8000/docs for interactive API documentation with a built-in testing interface.
+
+## Development
+
+### Local Development Setup
+
+**Using Conda**
+```bash
+# Create conda environment
+conda env create -f environment.yml
+
+# Activate environment
+conda activate verif
+
+# Install pre-commit hooks
+pre-commit install
+
+# Run the application
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full development setup instructions.
+
+### Project Structure
+
+```
+verif/
+├── app/
+│   ├── __init__.py
+│   ├── main.py              # FastAPI application
+│   ├── model.py             # BERT model wrapper
+│   └── static/
+│       └── index.html       # Web UI
+├── tests/
+│   ├── test_unit_model.py   # Unit tests
+│   └── test_e2e_docker.py   # E2E tests
+├── .github/
+│   └── workflows/
+│       └── ci.yml           # GitHub Actions CI/CD
+├── Dockerfile               # Docker image definition
+├── docker-compose.yml       # Docker Compose configuration
+├── environment.yml          # Conda dependencies
+├── .pre-commit-config.yaml  # Pre-commit hooks
+├── .dockerignore
+├── .gitignore
+└── README.md
+```
+
+## Model Information
+
+- **Model**: [followsci/bert-ai-text-detector](https://huggingface.co/followsci/bert-ai-text-detector)
+- **Architecture**: BERT-base-uncased
+- **Training Data**: ~1.4 million samples
+- **Accuracy**: 99.57%
+- **F1-Score**: 99.58%
+- **False Positive Rate**: 0.82%
+- **Recall**: 99.94%
+- **Max Input Length**: 512 tokens
+
+## Technical Details
+
+### Technology Stack
+
+- **Backend**: FastAPI (Python 3.11)
+- **ML Framework**: PyTorch + Transformers
+- **Model**: BERT-base-uncased
+- **Container**: Docker with multi-stage build
+- **Frontend**: Vanilla HTML/CSS/JavaScript
+
+### Resource Requirements
+
+- **RAM**: ~2GB minimum (for model loading)
+- **Disk**: ~2GB (for model cache)
+- **CPU**: Any modern CPU (GPU not required)
+
+### Performance
+
+- **First request**: 5-10 seconds (model loading)
+- **Subsequent requests**: <1 second
+- **Concurrent requests**: Supported (model is loaded once)
+
+## Stopping the Application
+
+```bash
+# If running with docker-compose
+docker-compose down
+
+# To also remove the model cache volume
+docker-compose down -v
+```
+
+## Troubleshooting
+
+### Model Download Issues
+
+If the model fails to download, check your internet connection. The first run downloads ~400MB from Hugging Face.
+
+### Port Already in Use
+
+If port 8000 is already in use, modify the port in `docker-compose.yml`:
+```yaml
+ports:
+  - "8001:8000"  # Change 8001 to any available port
+```
+
+### Memory Issues
+
+If you encounter OOM errors, increase Docker's memory limit to at least 2GB in Docker Desktop settings.
+
+## Future Enhancements
+
+- [ ] Batch processing API endpoint
+- [ ] Support for multiple languages
+- [ ] Confidence threshold settings
+- [ ] Text highlighting for AI-likely sections
+- [ ] Export results to PDF/CSV
+- [ ] API rate limiting
+- [ ] User authentication
+
+## License
+
+MIT License - feel free to use this project for learning, development, or production.
+
+## Acknowledgments
+
+- Model: [Open-Detector](https://huggingface.co/followsci/bert-ai-text-detector) by followsci
+- Built with [FastAPI](https://fastapi.tiangolo.com/)
+- Powered by [Hugging Face Transformers](https://huggingface.co/transformers/)
+
+## Contributing
+
+This is a learning/warmup project, but contributions are welcome! Feel free to:
+- Report bugs
+- Suggest features
+- Submit pull requests
+- Share your use cases
+
+---
+
+**Note**: This detector identifies *style patterns* associated with AI writing. It should be used as one tool among many for academic integrity, not as definitive proof.
