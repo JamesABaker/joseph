@@ -7,7 +7,7 @@
     <title>AI Text Detector</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cutive+Mono&family=Libre+Baskerville:ital@1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Libre+Baskerville:ital@1&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,7 +16,8 @@
         }
 
         body {
-            font-family: 'Cutive Mono', monospace;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
             background: #d4d4d4;
             min-height: 100vh;
             display: flex;
@@ -64,7 +65,8 @@
             border: 3px solid #000;
             background: #fff;
             font-size: 14px;
-            font-family: 'Cutive Mono', monospace;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
             resize: vertical;
         }
 
@@ -83,8 +85,8 @@
             flex: 1;
             padding: 15px 30px;
             font-size: 14px;
-            font-weight: 400;
-            font-family: 'Cutive Mono', monospace;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
             border: 3px solid #000;
             background: #fff;
             cursor: pointer;
@@ -324,7 +326,8 @@ Example: The rapid advancement of artificial intelligence has transformed numero
                 <h3>📊 Analysis Details</h3>
                 <div class="metric-grid">
                     <div class="metric-item">
-                        <div class="metric-label">ML Model Score</div>
+                        <div class="metric-label">GPT 2 <a href="https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta"
+                    target="_blank">RoBERTa</a></div>
                         <div class="metric-value" id="mlScore">0%</div>
                     </div>
                     <div class="metric-item">
@@ -364,8 +367,6 @@ Example: The rapid advancement of artificial intelligence has transformed numero
         </div>
 
         <div class="footer">
-            <p>Powered by <a href="https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta"
-                    target="_blank">RoBERTa</a> + Entropy Analysis</p>
             <p>🤖 Hybrid detection combining ML with information theory</p>
         </div>
     </div>
@@ -439,9 +440,9 @@ Example: The rapid advancement of artificial intelligence has transformed numero
             resultDiv.className = 'result ' + data.prediction;
 
             if (data.prediction === 'ai') {
-                resultTitle.textContent = '⚠️ Likely AI-Generated';
+                resultTitle.textContent = '⚠️ AI-Generated';
             } else {
-                resultTitle.textContent = '✅ Likely Human-Written';
+                resultTitle.textContent = '✅ No AI Signal';
             }
 
             // Show result
