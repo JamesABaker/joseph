@@ -55,7 +55,7 @@ docker run -p 8000:8000 -v model-cache:/root/.cache/huggingface verif
 1. Open http://localhost:8000 in your browser
 2. Paste or type text into the textarea
 3. Click "Detect AI"
-4. View the results showing human vs. AI probabilities
+4. View the results
 
 ### REST API
 

@@ -9,3 +9,5 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    # Required for beta ecosystems
+    enable-beta-ecosystems: true
