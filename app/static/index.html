@@ -164,7 +164,7 @@
         .metrics {
             margin-top: 20px;
             padding: 15px;
-            background: #d4d4d4;
+            background: #ffffff;
             border: 3px solid #000;
         }
 
@@ -280,13 +280,61 @@
         .footer a:hover {
             text-decoration: none;
         }
+
+        .tech-stack {
+            margin-top: 25px;
+            padding: 20px;
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0 #000;
+        }
+
+        .tech-stack h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .tech-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tech-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .tech-logo:hover {
+            opacity: 1;
+        }
+
+        .tech-logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .tech-logo span {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <h1>Veri<span class="f-italic">f.</span> </h1>
-        <p class="subtitle">Ensemble Analysis for robust AI detection</p>
+        <p class="subtitle">🤖 Hybrid analysis for sensitive AI detection</p>
 
         <textarea id="textInput"
             placeholder="Paste or type text here to analyze...
@@ -367,7 +415,29 @@ Example: The rapid advancement of artificial intelligence has transformed numero
         </div>
 
         <div class="footer">
-            <p>🤖 Hybrid ai detection combining ML with information theory</p>
+            <p> This product is not scientifically tested and should not be used as evidence of AI authorship.</p>
+        </div>
+
+        <div class="tech-stack">
+            <h3>Built With</h3>
+            <div class="tech-logos">
+                <div class="tech-logo">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python">
+                    <span>Python</span>
+                </div>
+                <div class="tech-logo">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" alt="FastAPI">
+                    <span>FastAPI</span>
+                </div>
+                <div class="tech-logo">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker">
+                    <span>Docker</span>
+                </div>
+                <div class="tech-logo">
+                    <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face">
+                    <span>Transformers</span>
+                </div>
+            </div>
         </div>
     </div>
 
