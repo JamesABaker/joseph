@@ -18,12 +18,9 @@ A hybrid AI text detection system combining machine learning with information th
 
 ## Quick Start
 
-### Prerequisites
-
-- Docker and Docker Compose installed
-- 2GB free disk space (for model download)
-
 ### Run with Docker Compose (Recommended)
+
+Install [Docker](https://docs.docker.com/get-docker/) if you haven't already.
 
 ```bash
 # Clone or navigate to the project directory
@@ -128,6 +125,7 @@ pre-commit install
 - [ ] User 2fa authentication
 - [ ] Method refinement
 - [ ] Deployment
+- [ ] Volume data persistence for users
 
 
 ## License
