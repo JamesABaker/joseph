@@ -45,7 +45,7 @@ The application will be available at:
 docker build -t verif .
 
 # Run the container
-docker run -p 8000:8000 -v model-cache:/root/.cache/huggingface verif
+docker run -p 8000:8000 verif
 ```
 
 ## Usage
