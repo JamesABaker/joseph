@@ -7,7 +7,7 @@ A hybrid AI text detection system combining machine learning with information th
 
 ## Features
 
-- 🧠 **Hybrid Detection** - combines ML model with entropy analysis for better accuracy
+- 🧠 **Hybrid Detection** - combines ML model with entropy analysis for broader insights
 - 📊 **Information Theory** - perplexity, Shannon entropy, burstiness, lexical diversity
 - 🎯 **Robust Against Modern LLMs** - entropy features work on GPT-4/GPT-5 output
 - 🐳 **Fully containerized** - runs anywhere with Docker
@@ -108,8 +108,6 @@ pre-commit install
 
 ## Model Information
 
-- **ML Model**: [Hello-SimpleAI/chatgpt-detector-roberta](https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta)
-- **Architecture**: Hybrid - RoBERTa + Entropy Analysis
 - **ML Component**: RoBERTa-base trained on ChatGPT output
 - **Entropy Features**:
   - **Perplexity**: Measures text predictability (lower = more AI-like)
