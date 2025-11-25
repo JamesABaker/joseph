@@ -5,19 +5,16 @@
 
 > *"There are simply too many notes."* — Emperor Joseph II to Mozart
 
-**Joseph** is a hybrid AI text detection system combining machine learning with information theory. Named after Emperor Joseph II, who famously told Mozart his music had "too many notes"—a reminder that something trying to be too perfect can be detected.
-
+**Joseph** is a hybrid AI text detection system combining machine learning with information theory. Named after Emperor Joseph II, who might have told Mozart his music had "too many notes"—a reminder that something trying to be too perfect can be detected.
 
 ## Features
 
 - 🧠 **Hybrid Detection** - combines ML model with entropy analysis for broader insights
 - 📊 **Information Theory** - perplexity, Shannon entropy, burstiness, lexical diversity
-- 🎯 **Sensitive Against Modern LLMs** - entropy features work on GPT-4/GPT-5 output
+  - 🎯 **Sensitive Against Modern LLMs** - entropy features work on GPT-4/GPT-5 output
 - 🐳 **Fully containerized** - runs anywhere with Docker
 - 🌐 **Web UI + REST API** - easy to use, easy to integrate
-- 🚀 **Fast inference** - results in seconds
 - 💾 **Model caching** - downloads once, runs forever
-- 🔒 **Privacy-first** - runs completely locally, no external API calls
 
 ## Quick Start
 
