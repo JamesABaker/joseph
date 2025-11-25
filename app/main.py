@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="AI Text Detector API",
+    title="Joseph - AI Text Detector API",
     description="Ensemble analysis of ML and entropy-based methods to detect AI-generated text.",
     version="2.0.0",
 )
@@ -79,7 +79,7 @@ async def startup_event():
 
 
 @app.get("/", response_class=HTMLResponse)
-async def root():
+def root():
     """Serve the web UI."""
     html_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
     try:
@@ -88,6 +88,20 @@ async def root():
     except FileNotFoundError:
         return HTMLResponse(
             content="<h1>UI not found</h1><p>Please ensure static/index.html exists.</p>",
+            status_code=404,
+        )
+
+
+@app.get("/about", response_class=HTMLResponse)
+def about():
+    """Serve the about page."""
+    html_path = os.path.join(os.path.dirname(__file__), "static", "about.html")
+    try:
+        with open(html_path, "r") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<h1>About page not found</h1><p>Please ensure static/about.html exists.</p>",
             status_code=404,
         )
 
@@ -108,7 +122,7 @@ async def model_info():
 
 
 @app.post("/api/detect", response_model=DetectionResponse)
-async def detect_text(request: DetectionRequest):
+def detect_text(request: DetectionRequest):
     """
     Detect if text is AI-generated or human-written.
 

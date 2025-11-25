@@ -1,15 +1,18 @@
-# verif
+# Joseph
 
 [![Docker Build](https://github.com/JamesABaker/verif/actions/workflows/docker.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/docker.yml)
 [![pre-commit](https://github.com/JamesABaker/verif/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/pre-commit.yml)
 
-A hybrid AI text detection system combining machine learning with information theory. Uses RoBERTa ML classifier + entropy-based analysis (perplexity, burstiness, Shannon entropy) for robust detection of AI-generated text.
+> *"There are simply too many notes."* — Emperor Joseph II to Mozart
+
+**Joseph** is a hybrid AI text detection system combining machine learning with information theory. Named after Emperor Joseph II, who famously told Mozart his music had "too many notes"—a reminder that something trying to be too perfect can be detected.
+
 
 ## Features
 
 - 🧠 **Hybrid Detection** - combines ML model with entropy analysis for broader insights
 - 📊 **Information Theory** - perplexity, Shannon entropy, burstiness, lexical diversity
-- 🎯 **Robust Against Modern LLMs** - entropy features work on GPT-4/GPT-5 output
+- 🎯 **Sensitive Against Modern LLMs** - entropy features work on GPT-4/GPT-5 output
 - 🐳 **Fully containerized** - runs anywhere with Docker
 - 🌐 **Web UI + REST API** - easy to use, easy to integrate
 - 🚀 **Fast inference** - results in seconds

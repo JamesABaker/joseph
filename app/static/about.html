@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Joseph - AI Text Detector</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Libre+Baskerville:ital@1&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            border: 4px solid #000;
+            box-shadow: 8px 8px 0 #000;
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #fff;
+            color: #000;
+            padding: 8px 16px;
+            border: 3px solid #000;
+            text-decoration: none;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9em;
+            transition: all 0.1s;
+        }
+
+        .back-link:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 #000;
+        }
+
+        .alpha-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff69b4;
+            color: #000;
+            padding: 8px 16px;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0 #000;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+            transform: rotate(3deg);
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            color: #000;
+            margin-bottom: 10px;
+            margin-top: 40px;
+            font-size: 4em;
+            font-weight: 400;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .f-italic {
+            font-family: 'Libre Baskerville', serif;
+            font-style: italic;
+            font-size: 1.2em;
+        }
+
+        .subtitle {
+            color: #333;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 0.9em;
+        }
+
+        .content {
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .section {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: #fff;
+            border: 3px solid #000;
+        }
+
+        .section h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2em;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            color: #000;
+        }
+
+        .section p {
+            margin-bottom: 15px;
+            font-size: 0.85em;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .quote {
+            background: #f5f5f5;
+            border-left: 4px solid #000;
+            padding: 20px;
+            margin: 25px 0;
+            font-style: italic;
+            font-family: 'Libre Baskerville', serif;
+            font-size: 0.9em;
+        }
+
+        .quote-author {
+            margin-top: 10px;
+            text-align: right;
+            font-family: 'Space Mono', monospace;
+            font-style: normal;
+            font-size: 0.75em;
+        }
+
+        .highlight {
+            background: #ebb8f8;
+            padding: 2px 6px;
+            border: 2px solid #000;
+        }
+
+        .manifesto {
+            background: #000;
+            color: #fff;
+            padding: 30px;
+            border: 4px solid #000;
+            box-shadow: 8px 8px 0 #ff69b4;
+            margin: 30px 0;
+        }
+
+        .manifesto h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+
+        .manifesto p {
+            font-size: 0.85em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .manifesto ul {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .manifesto li {
+            padding: 8px 0;
+            font-size: 0.85em;
+            font-weight: 400;
+        }
+
+        .manifesto li:before {
+            content: "▸ ";
+            color: #ff69b4;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .tech-note {
+            background: #ffffff;
+            border: 3px dashed #000;
+            padding: 20px;
+            margin: 25px 0;
+            font-size: 0.8em;
+        }
+
+        .tech-note strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        a {
+            color: #000;
+            text-decoration: underline;
+        }
+
+        a:hover {
+            background: #ebb8f8;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #000;
+            font-size: 0.8em;
+            padding-top: 20px;
+            border-top: 3px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Detector</a>
+        <div class="alpha-badge">ALPHA</div>
+
+        <h1>Joseph</h1>
+        <p class="subtitle">Named after the emperor who thought Mozart had "too many notes"</p>
+
+        <div class="content">
+            <div class="quote">
+                "There are simply too many notes, that's all. Just cut a few and it will be perfect."
+                <div class="quote-author">— Emperor Joseph II to Mozart, maybe</div>
+            </div>
+
+            <div class="section">
+                <h2>The Anecdote</h2>
+                <p>
+                    When Mozart played <em>The Abduction from the Seraglio</em> in 1782 for Emperor Joseph II, Joseph supposedly told him there were "too many notes." Mozart's legendary reply: "Which few did you have in mind, Majesty?"
+                </p>
+                <p>
+                    The emperor couldn't answer. I suppose he had no specific critique—just a vague sense that something was "too much."
+                </p>
+            </div>
+
+            <div class="manifesto">
+                <h2>⚡ What Joseph Stands For</h2>
+                <ul>
+                    <li><strong>Transparency over obfuscation.</strong> Every metric is shown. You see the ML model score, the entropy analysis, the perplexity, the burstiness—all of it.</li>
+                    <li><strong>Skepticism over certainty.</strong> Joseph doesn't claim perfect accuracy. It acknowledges its limitations. False positives happen. AI detection is probabilistic, not forensic, nor evidencial.</li>
+                    <li><strong>Open over closed.</strong> The code is public. The model is downloadable. You can fork it, audit it, break it, improve it.</li>
+                    <li><strong>Tools, not judges.</strong> Joseph doesn't tell you what to believe. It shows you data and lets you think for yourself.</li>
+                </ul>
+            </div>
+
+
+
+            <div class="section">
+                <h2>Who This Is For</h2>
+                <p>
+                    Joseph is for anyone who refuses to outsource their critical thinking:
+                </p>
+
+            </div>
+
+            <div class="section">
+                <h2>What Joseph Is NOT</h2>
+                <p>
+                    Joseph is <strong>not evidence</strong>. It's not a lie detector. It's not a plagiarism checker. It's not a substitute for actually reading someone's work.
+                </p>
+                <p>
+                    It's a tool. A flawed, experimental, alpha-stage tool. Use it accordingly.
+                </p>
+            </div>
+
+            <div class="footer">
+                <p>Joseph is open-source, MIT licensed, and can run 100% locally.</p>
+                <p><a href="https://github.com/JamesABaker/verif" target="_blank">View source on GitHub</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
