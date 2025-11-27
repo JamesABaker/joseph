@@ -20,6 +20,9 @@ wheels/
 .installed.cfg
 *.egg
 
+# Environment variables
+.env
+
 # Virtual Environment
 venv/
 env/
@@ -49,3 +52,6 @@ models/
 
 #Data
 data/
+
+# Environment variables
+.env

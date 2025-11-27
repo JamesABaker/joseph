@@ -6,11 +6,16 @@ import logging
 import os
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
+from app.database import Base, engine, get_db
+from app.dependencies import get_current_user, get_current_user_optional
 from app.model import AIDetector
+from app.models import Result, User
+from app.routes import auth as auth_routes
 
 # Configure logging
 logging.basicConfig(
@@ -24,6 +29,9 @@ app = FastAPI(
     description="Ensemble analysis of ML and entropy-based methods to detect AI-generated text.",
     version="2.0.0",
 )
+
+# Include auth routes
+app.include_router(auth_routes.router)
 
 # Initialize model (singleton - loaded once at startup)
 detector: Optional[AIDetector] = None
@@ -67,14 +75,19 @@ class DetectionResponse(BaseModel):
 
 @app.on_event("startup")
 async def startup_event():
-    """Load model on startup."""
+    """Load model and create database tables on startup."""
     global detector
     logger.info("Starting application...")
     try:
+        # Create database tables
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created")
+
+        # Load ML model
         detector = AIDetector()
         logger.info("Application startup complete")
     except Exception as e:
-        logger.error(f"Failed to load model: {e}")
+        logger.error(f"Failed to start application: {e}")
         raise
 
 
@@ -122,12 +135,19 @@ async def model_info():
 
 
 @app.post("/api/detect", response_model=DetectionResponse)
-def detect_text(request: DetectionRequest):
+def detect_text(
+    request: DetectionRequest,
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    db: Session = Depends(get_db),
+):
     """
     Detect if text is AI-generated or human-written.
+    Authentication is optional. If authenticated, saves result to user's history.
 
     Args:
         request: DetectionRequest containing the text to analyze
+        current_user: Authenticated user from JWT token (optional)
+        db: Database session
 
     Returns:
         DetectionResponse with probabilities and prediction
@@ -138,12 +158,129 @@ def detect_text(request: DetectionRequest):
     try:
         result = detector.detect(request.text)
         result["text_length"] = len(request.text)
+
+        # Save result to database only if user is authenticated
+        if current_user:
+            db_result = Result(
+                user_id=current_user.id,
+                text_analyzed=request.text,
+                human_probability=result["human_probability"],
+                ai_probability=result["ai_probability"],
+                prediction=result["prediction"],
+                ml_human_probability=result["ml_human_probability"],
+                ml_ai_probability=result["ml_ai_probability"],
+                perplexity=result["perplexity"],
+                shannon_entropy=result["shannon_entropy"],
+                burstiness=result["burstiness"],
+                lexical_diversity=result["lexical_diversity"],
+                word_length_variance=result["word_length_variance"],
+                punctuation_diversity=result["punctuation_diversity"],
+                vocabulary_richness=result["vocabulary_richness"],
+                entropy_ai_probability=result["entropy_ai_probability"],
+                entropy_human_probability=result["entropy_human_probability"],
+            )
+            db.add(db_result)
+            db.commit()
+
         return DetectionResponse(**result)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Detection error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error during detection")
+
+
+@app.get("/api/results")
+async def get_user_results(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    limit: int = 50,
+    offset: int = 0,
+):
+    """
+    Get detection results history for the current user.
+
+    Args:
+        current_user: Authenticated user from JWT token
+        db: Database session
+        limit: Maximum number of results to return (default 50)
+        offset: Number of results to skip (default 0)
+
+    Returns:
+        List of user's detection results
+    """
+    results = (
+        db.query(Result)
+        .filter(Result.user_id == current_user.id)
+        .order_by(Result.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+
+    return {
+        "results": [
+            {
+                "id": r.id,
+                "text_analyzed": r.text_analyzed[:100] + "..."
+                if len(r.text_analyzed) > 100
+                else r.text_analyzed,
+                "human_probability": r.human_probability,
+                "ai_probability": r.ai_probability,
+                "prediction": r.prediction,
+                "created_at": r.created_at.isoformat(),
+            }
+            for r in results
+        ],
+        "total": db.query(Result).filter(Result.user_id == current_user.id).count(),
+        "limit": limit,
+        "offset": offset,
+    }
+
+
+@app.get("/api/results/{result_id}")
+async def get_result_detail(
+    result_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get detailed information for a specific result.
+
+    Args:
+        result_id: ID of the result to retrieve
+        current_user: Authenticated user from JWT token
+        db: Database session
+
+    Returns:
+        Detailed result information
+    """
+    result = (
+        db.query(Result).filter(Result.id == result_id, Result.user_id == current_user.id).first()
+    )
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Result not found")
+
+    return {
+        "id": result.id,
+        "text_analyzed": result.text_analyzed,
+        "human_probability": result.human_probability,
+        "ai_probability": result.ai_probability,
+        "prediction": result.prediction,
+        "ml_human_probability": result.ml_human_probability,
+        "ml_ai_probability": result.ml_ai_probability,
+        "perplexity": result.perplexity,
+        "shannon_entropy": result.shannon_entropy,
+        "burstiness": result.burstiness,
+        "lexical_diversity": result.lexical_diversity,
+        "word_length_variance": result.word_length_variance,
+        "punctuation_diversity": result.punctuation_diversity,
+        "vocabulary_richness": result.vocabulary_richness,
+        "entropy_ai_probability": result.entropy_ai_probability,
+        "entropy_human_probability": result.entropy_human_probability,
+        "created_at": result.created_at.isoformat(),
+    }
 
 
 @app.get("/favicon.ico")

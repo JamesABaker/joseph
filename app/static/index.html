@@ -20,10 +20,76 @@
             font-weight: 700;
             background: #ffffff;
             min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .top-banner {
+            background: #000;
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #000;
+        }
+
+        .banner-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+
+        .banner-auth {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .banner-user {
+            padding: 8px 15px;
+            background: #fff;
+            color: #000;
+            border: 2px solid #fff;
+            font-size: 0.9em;
+        }
+
+        .banner-btn {
+            padding: 8px 16px;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 0.85em;
+            border: 2px solid #fff;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-decoration: none;
+            display: inline-block;
+            color: #fff;
+            background: transparent;
+        }
+
+        .banner-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .banner-btn.login {
+            background: #ebb8f8;
+            color: #000;
+            border-color: #ebb8f8;
+        }
+
+        .banner-btn.login:hover {
+            background: #d89ee5;
+        }
+
+        .main-content {
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 40px 20px;
+            min-height: calc(100vh - 63px);
         }
 
         .container {
@@ -372,14 +438,111 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        .login-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: #fff;
+            min-width: 200px;
+            box-shadow: 4px 4px 0 #000;
+            border: 3px solid #000;
+            z-index: 1000;
+            margin-top: 10px;
+        }
+
+        .dropdown-content a {
+            color: #000;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            border-bottom: 2px solid #000;
+            transition: background 0.1s;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background: #ebb8f8;
+        }
+
+        .login-dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 3px solid #000;
+            background: #fff;
+            display: none;
+        }
+
+        .history-section h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .history-item {
+            padding: 15px;
+            border: 2px solid #000;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .history-item:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 #000;
+        }
+
+        .history-meta {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <a href="https://github.com/JamesABaker/joseph" class="alpha-badge" target="_blank" rel="noopener noreferrer">ALPHA</a>
-        <h1>Joseph</h1>
-        <p class="subtitle">🤖 Hybrid analysis for sensitive AI detection</p>
+    <!-- Top Banner -->
+    <div class="top-banner">
+        <div class="banner-logo">JOSEPH</div>
+        <div class="banner-auth">
+            <!-- Not logged in -->
+            <div id="bannerAuthButtons" class="hidden">
+                <a href="/auth/login/github" class="banner-btn login">🔐 Login with GitHub</a>
+            </div>
+            <!-- Logged in -->
+            <div id="bannerUserInfo" class="hidden">
+                <div class="banner-user">
+                    <span id="bannerUserName"></span>
+                </div>
+                <button class="banner-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <a href="https://github.com/JamesABaker/joseph" class="alpha-badge" target="_blank" rel="noopener noreferrer">ALPHA</a>
+            <h1>Joseph</h1>
+            <p class="subtitle">🤖 Hybrid analysis for sensitive AI detection</p>
 
         <textarea id="textInput"
             placeholder="Paste or type text here to analyze...
@@ -459,6 +622,12 @@ Example: The rapid advancement of artificial intelligence has transformed numero
             </div>
         </div>
 
+        <!-- Results History Section -->
+        <div id="historySection" class="history-section">
+            <h3>📜 Your Detection History</h3>
+            <div id="historyList"></div>
+        </div>
+
         <div class="footer">
             <p> This product is not scientifically tested and should not be used as evidence of AI authorship.</p>
         </div>
@@ -488,9 +657,188 @@ Example: The rapid advancement of artificial intelligence has transformed numero
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <script>
+        // State management
+        let accessToken = localStorage.getItem('accessToken');
+        let refreshToken = localStorage.getItem('refreshToken');
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+        // Initialize UI on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for OAuth callback tokens in URL hash
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+
+            if (params.has('access_token')) {
+                // Store tokens from OAuth callback
+                accessToken = params.get('access_token');
+                refreshToken = params.get('refresh_token');
+                const userJson = params.get('user');
+
+                if (userJson) {
+                    currentUser = JSON.parse(decodeURIComponent(userJson));
+                }
+
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            updateAuthUI();
+
+            if (accessToken) {
+                loadUserHistory();
+            }
+        });
+
+        function updateAuthUI() {
+            const bannerAuthButtons = document.getElementById('bannerAuthButtons');
+            const bannerUserInfo = document.getElementById('bannerUserInfo');
+            const historySection = document.getElementById('historySection');
+
+            if (accessToken && currentUser) {
+                // User is logged in
+                bannerAuthButtons.classList.add('hidden');
+                bannerUserInfo.classList.remove('hidden');
+                historySection.style.display = 'block';
+
+                // Update banner user info
+                document.getElementById('bannerUserName').textContent = currentUser.name || currentUser.email.split('@')[0];
+            } else {
+                // User is not logged in
+                bannerAuthButtons.classList.remove('hidden');
+                bannerUserInfo.classList.add('hidden');
+                historySection.style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('currentUser');
+            accessToken = null;
+            refreshToken = null;
+            currentUser = null;
+            updateAuthUI();
+            clearAll();
+        }
+
+        async function makeAuthenticatedRequest(url, options = {}) {
+            if (!accessToken) {
+                throw new Error('Not authenticated');
+            }
+
+            // Add auth header
+            options.headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${accessToken}`
+            };
+
+            let response = await fetch(url, options);
+
+            // If unauthorized, try to refresh token
+            if (response.status === 401 && refreshToken) {
+                const refreshed = await refreshAccessToken();
+                if (refreshed) {
+                    // Retry with new token
+                    options.headers['Authorization'] = `Bearer ${accessToken}`;
+                    response = await fetch(url, options);
+                } else {
+                    // Refresh failed, logout
+                    logout();
+                    throw new Error('Session expired. Please login again.');
+                }
+            }
+
+            return response;
+        }
+
+        async function refreshAccessToken() {
+            try {
+                const response = await fetch('/auth/refresh', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ refresh_token: refreshToken })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    accessToken = data.access_token;
+                    refreshToken = data.refresh_token;
+                    currentUser = data.user;
+
+                    localStorage.setItem('accessToken', accessToken);
+                    localStorage.setItem('refreshToken', refreshToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                    return true;
+                }
+            } catch (error) {
+                console.error('Token refresh failed:', error);
+            }
+            return false;
+        }
+
+        async function loadUserHistory() {
+            try {
+                const response = await makeAuthenticatedRequest('/api/results?limit=10');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayHistory(data.results);
+                }
+            } catch (error) {
+                console.error('Failed to load history:', error);
+            }
+        }
+
+        function displayHistory(results) {
+            const historyList = document.getElementById('historyList');
+
+            if (results.length === 0) {
+                historyList.innerHTML = '<p style="color: #666;">No detection history yet. Run your first analysis above!</p>';
+                return;
+            }
+
+            historyList.innerHTML = results.map(result => `
+                <div class="history-item" onclick="loadHistoryItem(${result.id})">
+                    <div style="font-weight: 700;">
+                        ${result.prediction === 'ai' ? '⚠️ AI-Generated' : '✅ No AI Signal'}
+                        (${result.ai_probability.toFixed(1)}% AI)
+                    </div>
+                    <div style="margin-top: 5px; font-size: 0.9em;">
+                        "${result.text_analyzed}"
+                    </div>
+                    <div class="history-meta">
+                        ${new Date(result.created_at).toLocaleString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadHistoryItem(resultId) {
+            try {
+                const response = await makeAuthenticatedRequest(`/api/results/${resultId}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('textInput').value = data.text_analyzed;
+                    displayResult(data);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } catch (error) {
+                showError('Failed to load result: ' + error.message);
+            }
+        }
+
         async function detectText() {
             const textInput = document.getElementById('textInput');
             const text = textInput.value.trim();
@@ -510,13 +858,27 @@ Example: The rapid advancement of artificial intelligence has transformed numero
             document.getElementById('detectBtn').disabled = true;
 
             try {
-                const response = await fetch('/api/detect', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ text: text })
-                });
+                let response;
+
+                if (accessToken) {
+                    // Authenticated request - saves to history
+                    response = await makeAuthenticatedRequest('/api/detect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text: text })
+                    });
+                } else {
+                    // Unauthenticated request - no history saved
+                    response = await fetch('/api/detect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text: text })
+                    });
+                }
 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -525,6 +887,11 @@ Example: The rapid advancement of artificial intelligence has transformed numero
 
                 const data = await response.json();
                 displayResult(data);
+
+                // Reload history if logged in
+                if (accessToken) {
+                    loadUserHistory();
+                }
 
             } catch (error) {
                 showError('Error: ' + error.message);
