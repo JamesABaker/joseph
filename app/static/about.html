@@ -20,10 +20,74 @@
             font-weight: 700;
             background: #ffffff;
             min-height: 100vh;
+        }
+
+        .top-banner {
+            background: #000;
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #000;
+        }
+
+        .banner-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            letter-spacing: 2px;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .banner-auth {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .banner-user {
+            padding: 8px 15px;
+            background: #fff;
+            color: #000;
+            border: 2px solid #fff;
+            font-size: 0.9em;
+        }
+
+        .banner-btn {
+            padding: 8px 16px;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 0.85em;
+            border: 2px solid #fff;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-decoration: none;
+            display: inline-block;
+            color: #fff;
+            background: transparent;
+        }
+
+        .banner-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .banner-btn.login {
+            background: #ebb8f8;
+            color: #000;
+            border-color: #ebb8f8;
+        }
+
+        .banner-btn.login:hover {
+            background: #d89ee5;
+        }
+
+        .main-content {
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
         .container {
@@ -68,6 +132,18 @@
             font-size: 1.2em;
             letter-spacing: 2px;
             transform: rotate(3deg);
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.1s;
+        }
+
+        .alpha-badge:hover {
+            transform: rotate(3deg) translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #000;
+        }
+
+        .hidden {
+            display: none;
         }
 
         h1 {
@@ -223,12 +299,31 @@
 </head>
 
 <body>
+    <!-- Top Banner -->
+    <div class="top-banner">
+        <a href="/" class="banner-logo">JOSEPH</a>
+        <div class="banner-auth">
+            <!-- Not logged in -->
+            <div id="bannerAuthButtons" class="hidden">
+                <a href="/auth/login/github" class="banner-btn login">🔐 Login with GitHub</a>
+            </div>
+            <!-- Logged in -->
+            <div id="bannerUserInfo" class="hidden">
+                <div class="banner-user">
+                    <span id="bannerUserName"></span>
+                </div>
+                <button class="banner-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
     <div class="container">
         <a href="/" class="back-link">← Back to Detector</a>
-        <div class="alpha-badge">ALPHA</div>
+        <a href="https://github.com/JamesABaker/verif" class="alpha-badge" target="_blank" rel="noopener noreferrer">ALPHA</a>
 
         <h1>Joseph</h1>
-        <p class="subtitle">Named after the emperor who thought Mozart had "too many notes"</p>
 
         <div class="content">
             <div class="quote">
@@ -281,6 +376,45 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <script>
+        // State management
+        let accessToken = localStorage.getItem('accessToken');
+        let refreshToken = localStorage.getItem('refreshToken');
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+        // Initialize UI on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+        });
+
+        function updateAuthUI() {
+            const bannerAuthButtons = document.getElementById('bannerAuthButtons');
+            const bannerUserInfo = document.getElementById('bannerUserInfo');
+
+            if (accessToken && currentUser) {
+                // User is logged in
+                bannerAuthButtons.classList.add('hidden');
+                bannerUserInfo.classList.remove('hidden');
+                document.getElementById('bannerUserName').textContent = currentUser.name || currentUser.email.split('@')[0];
+            } else {
+                // User is not logged in
+                bannerAuthButtons.classList.remove('hidden');
+                bannerUserInfo.classList.add('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('currentUser');
+            accessToken = null;
+            refreshToken = null;
+            currentUser = null;
+            updateAuthUI();
+        }
+    </script>
 </body>
 
 </html>
