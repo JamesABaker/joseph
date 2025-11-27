@@ -1,26 +1,17 @@
-name: verif
+name: joseph
 channels:
-  - pytorch
   - conda-forge
   - defaults
 dependencies:
   - python=3.11
-  - pytorch::pytorch=2.1.2
-  - pytorch::cpuonly
-  - numpy<2
-  - conda-forge::transformers=4.36.2
-  - conda-forge::fastapi=0.109.0
-  - conda-forge::uvicorn=0.27.0
-  - conda-forge::pydantic=2.5.3
-  - conda-forge::python-multipart=0.0.6
-  - conda-forge::black=23.12.1
-  - conda-forge::isort=5.13.2
-  - conda-forge::flake8=7.0.0
-  - conda-forge::mypy=1.8.0
-  - conda-forge::pre-commit=3.6.0
-  - conda-forge::pytest=7.4.3
-  - conda-forge::pytest-cov=4.1.0
-  - conda-forge::requests=2.31.0
   - pip
   - pip:
-      - types-requests==2.31.0
+    - fastapi==0.115.6
+    - uvicorn[standard]==0.32.1
+    - transformers==4.47.1
+    - torch==2.5.1
+    - numpy==1.26.4
+    - pydantic==2.10.3
+    - pydantic-settings==2.6.1
+    - python-multipart==0.0.20
+    - jinja2==3.1.4

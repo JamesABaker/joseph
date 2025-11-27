@@ -46,3 +46,6 @@ models/
 
 # Logs
 *.log
+
+#Data
+data/
