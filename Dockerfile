@@ -14,7 +14,8 @@ RUN conda env create -f environment.yml && \
 COPY app/ ./app/
 
 # Activate environment and set path
-ENV PATH=/opt/conda/envs/verif/bin:$PATH
+ENV PATH=/opt/conda/envs/joseph/bin:$PATH
+SHELL ["conda", "run", "-n", "joseph", "/bin/bash", "-c"]
 
 # Pre-download the model during build to avoid startup delays
 RUN python -c "from transformers import AutoTokenizer, AutoModelForSequenceClassification; \
