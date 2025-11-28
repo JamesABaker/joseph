@@ -65,15 +65,6 @@ uv pip install -e ".[training]"
 pre-commit install
 ```
 
-**Using pip**
-```bash
-# Production dependencies
-pip install -e .
-
-# With training dependencies
-pip install -e ".[training]"
-```
-
 ## Model Information
 
 - **ML Component**: RoBERTa-base trained on ChatGPT output
