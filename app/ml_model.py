@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import joblib
+import numpy as np
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
@@ -36,19 +37,18 @@ class AIDetector:
         self.entropy_detector = EntropyDetector()
         logger.info("Entropy detector ready")
 
-        # Load trained Joseph Random Forest model
+        # Load trained Joseph Random Forest model (REQUIRED)
         joseph_model_path = Path(__file__).parent.parent / "models" / "joseph_v1.pkl"
-        if joseph_model_path.exists():
-            logger.info(f"Loading trained Joseph model from {joseph_model_path}")
-            self.joseph_model = joblib.load(joseph_model_path)
-            logger.info("Joseph model loaded successfully")
-        else:
-            logger.warning(
+        if not joseph_model_path.exists():
+            raise FileNotFoundError(
                 f"Joseph model not found at {joseph_model_path}. "
-                "Falling back to weighted hybrid approach. "
-                "Run scripts/prepare_features.py and scripts/train_joseph_model.py to train model."
+                "Please run scripts/prepare_features.py and "
+                "scripts/train_joseph_model.py to train the model."
             )
-            self.joseph_model = None
+
+        logger.info(f"Loading trained Joseph model from {joseph_model_path}")
+        self.joseph_model = joblib.load(joseph_model_path)
+        logger.info("Joseph model loaded successfully")
 
     def detect(self, text: str, max_length: int = 512) -> Dict[str, Any]:
         """
@@ -78,36 +78,26 @@ class AIDetector:
         # Get entropy-based analysis
         entropy_results = self.entropy_detector.detect(text)
 
-        # Use trained Joseph model if available
-        if self.joseph_model is not None:
-            # Prepare features for Joseph model (8 features)
-            import numpy as np
-
-            features = np.array(
+        # Prepare features for Joseph model (8 features)
+        features = np.array(
+            [
                 [
-                    [
-                        entropy_results["perplexity"],
-                        entropy_results["shannon_entropy"],
-                        entropy_results["burstiness"],
-                        entropy_results["lexical_diversity"],
-                        entropy_results["word_length_variance"],
-                        entropy_results["punctuation_diversity"],
-                        entropy_results["vocabulary_richness"],
-                        ml_ai_prob,  # RoBERTa as 8th feature
-                    ]
+                    entropy_results["perplexity"],
+                    entropy_results["shannon_entropy"],
+                    entropy_results["burstiness"],
+                    entropy_results["lexical_diversity"],
+                    entropy_results["word_length_variance"],
+                    entropy_results["punctuation_diversity"],
+                    entropy_results["vocabulary_richness"],
+                    ml_ai_prob,  # RoBERTa as 8th feature
                 ]
-            )
+            ]
+        )
 
-            # Get prediction from Joseph model
-            joseph_ai_prob = self.joseph_model.predict_proba(features)[0][1] * 100
-            joseph_human_prob = 100 - joseph_ai_prob
-            prediction = "ai" if joseph_ai_prob > 50 else "human"
-
-        else:
-            # Fallback: weighted hybrid if Joseph model not trained yet
-            joseph_ai_prob = 0.2 * ml_ai_prob + 0.8 * entropy_results["ai_probability_entropy"]
-            joseph_human_prob = 100 - joseph_ai_prob
-            prediction = "ai" if joseph_ai_prob > 50 else "human"
+        # Get prediction from Joseph model
+        joseph_ai_prob = self.joseph_model.predict_proba(features)[0][1] * 100
+        joseph_human_prob = 100 - joseph_ai_prob
+        prediction = "ai" if joseph_ai_prob > 50 else "human"
 
         return {
             # Joseph model final scores
@@ -132,11 +122,9 @@ class AIDetector:
 
     def get_model_info(self) -> Dict[str, Any]:
         """Get information about the hybrid detector."""
-        model_status = "Trained Joseph Model" if self.joseph_model else "Weighted Fallback"
-
         info: Dict[str, Any] = {
-            "model_name": "Joseph Random Forest" if self.joseph_model else "Weighted Hybrid",
-            "architecture": f"Random Forest on 8 features (7 entropy + RoBERTa) [{model_status}]",
+            "model_name": "Joseph Random Forest",
+            "architecture": "Random Forest on 8 features (7 entropy + RoBERTa)",
             "roberta_model": self.model_name,
             "entropy_features": [
                 "perplexity",
