@@ -2,6 +2,7 @@
 FastAPI application for AI text detection.
 Serves both REST API and web UI.
 """
+
 import logging
 import os
 from typing import Optional
@@ -173,25 +174,34 @@ def detect_text(
         result = detector.detect(request.text)
         result["text_length"] = len(request.text)
 
+        # Convert numpy types to Python native types for database compatibility
+        def convert_numpy(obj):
+            """Convert numpy types to Python native types."""
+            import numpy as np
+
+            if isinstance(obj, (np.integer, np.floating)):
+                return float(obj)
+            return obj
+
         # Save result to database only if user is authenticated
         if current_user:
             db_result = Result(
                 user_id=current_user.id,
                 text_analyzed=request.text,
-                human_probability=result["human_probability"],
-                ai_probability=result["ai_probability"],
+                human_probability=convert_numpy(result["human_probability"]),
+                ai_probability=convert_numpy(result["ai_probability"]),
                 prediction=result["prediction"],
-                ml_human_probability=result["ml_human_probability"],
-                ml_ai_probability=result["ml_ai_probability"],
-                perplexity=result["perplexity"],
-                shannon_entropy=result["shannon_entropy"],
-                burstiness=result["burstiness"],
-                lexical_diversity=result["lexical_diversity"],
-                word_length_variance=result["word_length_variance"],
-                punctuation_diversity=result["punctuation_diversity"],
-                vocabulary_richness=result["vocabulary_richness"],
-                entropy_ai_probability=result["entropy_ai_probability"],
-                entropy_human_probability=result["entropy_human_probability"],
+                ml_human_probability=convert_numpy(result["ml_human_probability"]),
+                ml_ai_probability=convert_numpy(result["ml_ai_probability"]),
+                perplexity=convert_numpy(result["perplexity"]),
+                shannon_entropy=convert_numpy(result["shannon_entropy"]),
+                burstiness=convert_numpy(result["burstiness"]),
+                lexical_diversity=convert_numpy(result["lexical_diversity"]),
+                word_length_variance=convert_numpy(result["word_length_variance"]),
+                punctuation_diversity=convert_numpy(result["punctuation_diversity"]),
+                vocabulary_richness=convert_numpy(result["vocabulary_richness"]),
+                entropy_ai_probability=convert_numpy(result["entropy_ai_probability"]),
+                entropy_human_probability=convert_numpy(result["entropy_human_probability"]),
             )
             db.add(db_result)
             db.commit()
@@ -236,9 +246,9 @@ async def get_user_results(
         "results": [
             {
                 "id": r.id,
-                "text_analyzed": r.text_analyzed[:100] + "..."
-                if len(r.text_analyzed) > 100
-                else r.text_analyzed,
+                "text_analyzed": (
+                    r.text_analyzed[:100] + "..." if len(r.text_analyzed) > 100 else r.text_analyzed
+                ),
                 "human_probability": r.human_probability,
                 "ai_probability": r.ai_probability,
                 "prediction": r.prediction,

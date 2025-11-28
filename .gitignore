@@ -45,7 +45,6 @@ Thumbs.db
 
 # Model cache
 .cache/
-models/
 
 # Logs
 *.log

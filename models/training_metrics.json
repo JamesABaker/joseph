@@ -1,0 +1,38 @@
+{
+  "accuracy": 0.9992100169846349,
+  "roc_auc": 0.9999858291507748,
+  "feature_importances": [
+    {
+      "feature": "roberta_ai_prob",
+      "importance": 0.5101686829177686
+    },
+    {
+      "feature": "perplexity",
+      "importance": 0.3461977002601849
+    },
+    {
+      "feature": "lexical_diversity",
+      "importance": 0.061211815093453935
+    },
+    {
+      "feature": "burstiness",
+      "importance": 0.044742267277863415
+    },
+    {
+      "feature": "word_length_variance",
+      "importance": 0.015197755569231
+    },
+    {
+      "feature": "punctuation_diversity",
+      "importance": 0.008410024448194508
+    },
+    {
+      "feature": "shannon_entropy",
+      "importance": 0.008348566185183197
+    },
+    {
+      "feature": "vocabulary_richness",
+      "importance": 0.005723188248120574
+    }
+  ]
+}

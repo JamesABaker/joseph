@@ -1,6 +1,7 @@
 """
 Authentication utilities for OAuth and JWT token management.
 """
+
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -27,7 +28,7 @@ def create_refresh_token(data: dict) -> str:
     return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 
-def verify_token(token: str, token_type: str = "access") -> Optional[dict]:
+def verify_token(token: str, token_type: str = "access") -> Optional[dict]:  # nosec B107
     """
     Verify and decode a JWT token.
 

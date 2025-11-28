@@ -50,16 +50,28 @@ Visit http://localhost:8000/docs for interactive API documentation with a built-
 
 ### Local Development Setup
 
-**Using Conda**
+**Using uv (recommended)**
 ```bash
-# Create conda environment
-conda env create -f environment.yml
+# Install uv if you don't have it
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Activate environment
-conda activate verif
+# Install production dependencies
+uv pip install -e .
+
+# For training (optional)
+uv pip install -e ".[training]"
 
 # Install pre-commit hooks
 pre-commit install
+```
+
+**Using pip**
+```bash
+# Production dependencies
+pip install -e .
+
+# With training dependencies
+pip install -e ".[training]"
 ```
 
 ## Model Information

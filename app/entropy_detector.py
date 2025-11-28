@@ -2,6 +2,7 @@
 Entropy and information theory-based AI text detection.
 Implements perplexity, Shannon entropy, and burstiness analysis.
 """
+
 import logging
 import math
 from typing import Any, Dict
@@ -24,8 +25,8 @@ class EntropyDetector:
             model_name: Hugging Face model for perplexity calculation (default: gpt2)
         """
         logger.info(f"Loading entropy detector with model: {model_name}")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)  # nosec B615
+        self.model = AutoModelForCausalLM.from_pretrained(model_name)  # nosec B615
         self.model.eval()
         logger.info("Entropy detector loaded successfully")
 

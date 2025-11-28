@@ -1,21 +1,25 @@
-# Use conda base image
-FROM continuumio/miniconda3:24.7.1-0
+# Use Python slim image
+FROM python:3.11-slim
+
 # Set working directory
 WORKDIR /app
 
-# Copy environment file
-COPY environment.yml .
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Create conda environment
-RUN conda env create -f environment.yml && \
-    conda clean -afy
+# Copy dependency files
+COPY pyproject.toml .
+
+# Install dependencies (production only, no training deps)
+# Install PyTorch CPU-only first to avoid CUDA dependencies
+RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu && \
+    uv pip install --system .
 
 # Copy application code
 COPY app/ ./app/
 
-# Activate environment and set path
-ENV PATH=/opt/conda/envs/joseph/bin:$PATH
-SHELL ["conda", "run", "-n", "joseph", "/bin/bash", "-c"]
+# Copy trained Joseph model
+COPY models/ ./models/
 
 # Pre-download the model during build to avoid startup delays
 RUN python -c "from transformers import AutoTokenizer, AutoModelForSequenceClassification; \

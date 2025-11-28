@@ -568,13 +568,9 @@ Example: The rapid advancement of artificial intelligence has transformed numero
         <div class="result" id="result">
             <h2 id="resultTitle"></h2>
             <div class="probabilities">
-                <div class="prob-card">
-                    <div class="prob-label">No Signal</div>
-                    <div class="prob-value human" id="humanProb">0%</div>
-                </div>
-                <div class="prob-card">
-                    <div class="prob-label">AI-Generated Signal</div>
-                    <div class="prob-value ai" id="aiProb">0%</div>
+                <div class="prob-card" style="max-width: 400px; margin: 0 auto;">
+                    <div class="prob-label">AI Signal Strength</div>
+                    <div class="prob-value ai" id="aiSignal">0</div>
                 </div>
             </div>
 
@@ -905,12 +901,10 @@ Example: The rapid advancement of artificial intelligence has transformed numero
         function displayResult(data) {
             const resultDiv = document.getElementById('result');
             const resultTitle = document.getElementById('resultTitle');
-            const humanProb = document.getElementById('humanProb');
-            const aiProb = document.getElementById('aiProb');
+            const aiSignal = document.getElementById('aiSignal');
 
-            // Update main probabilities
-            humanProb.textContent = data.human_probability.toFixed(1) + '%';
-            aiProb.textContent = data.ai_probability.toFixed(1) + '%';
+            // Update AI signal score (0-100 scale)
+            aiSignal.textContent = data.ai_probability.toFixed(1) + '%';
 
             // Update metrics
             document.getElementById('mlScore').textContent = data.ml_ai_probability.toFixed(1) + '% AI';
@@ -927,9 +921,9 @@ Example: The rapid advancement of artificial intelligence has transformed numero
             resultDiv.className = 'result ' + data.prediction;
 
             if (data.prediction === 'ai') {
-                resultTitle.textContent = '⚠️ AI-Generated';
+                resultTitle.textContent = '⚠️ AI-Generated Signal Detected';
             } else {
-                resultTitle.textContent = '✅ No AI Signal';
+                resultTitle.textContent = '✅ Low AI Signal';
             }
 
             // Show result

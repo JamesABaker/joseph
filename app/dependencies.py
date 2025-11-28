@@ -1,6 +1,7 @@
 """
 Dependencies for protected routes.
 """
+
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
@@ -32,7 +33,7 @@ async def get_current_user(
         HTTPException: If token is invalid or user not found
     """
     token = credentials.credentials
-    payload = verify_token(token, token_type="access")
+    payload = verify_token(token, token_type="access")  # nosec B106
 
     if not payload:
         raise HTTPException(
@@ -73,7 +74,7 @@ async def get_current_user_optional(
         return None
 
     token = credentials.credentials
-    payload = verify_token(token, token_type="access")
+    payload = verify_token(token, token_type="access")  # nosec B106
 
     if not payload:
         return None

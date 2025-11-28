@@ -1,6 +1,7 @@
 """
 Authentication routes for OAuth login and token management.
 """
+
 import logging
 import urllib.parse
 
@@ -158,7 +159,7 @@ async def refresh_access_token(
         request: Refresh token request
         db: Database session
     """
-    payload = verify_token(request.refresh_token, token_type="refresh")
+    payload = verify_token(request.refresh_token, token_type="refresh")  # nosec B106
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
