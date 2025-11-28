@@ -130,5 +130,3 @@ The trained `models/joseph_v1.pkl` is automatically loaded by the app.
 
 - **Feature consistency:** Training uses the same `EntropyDetector` class as inference, ensuring identical feature extraction
 - **Version control:** The trained model (`models/joseph_v1.pkl`) is included in git and the Docker image for production deployment
-- **Dataset:** HC3 contains ChatGPT output - may not generalize perfectly to GPT-4/Claude/Gemini
-- **Improvements:** Consider training on mixed LLM dataset for better generalization
