@@ -12,8 +12,8 @@ COPY pyproject.toml .
 
 # Install dependencies (production only, no training deps)
 # Install PyTorch CPU-only first to avoid CUDA dependencies
-RUN uv pip install --system --no-cache torch --index-url https://download.pytorch.org/whl/cpu && \
-    uv pip install --system --no-cache .
+RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu && \
+    uv pip install --system .
 
 # Copy application code
 COPY app/ ./app/
