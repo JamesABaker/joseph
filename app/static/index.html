@@ -601,6 +601,22 @@ Example: The rapid advancement of artificial intelligence has transformed numero
                         <div class="metric-label">Vocab Richness</div>
                         <div class="metric-value" id="vocabRichness">0</div>
                     </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Avg Sent Length</div>
+                        <div class="metric-value" id="avgSentLength">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Sent Length Std</div>
+                        <div class="metric-value" id="sentLengthStd">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Special Char Ratio</div>
+                        <div class="metric-value" id="specialCharRatio">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Uppercase Ratio</div>
+                        <div class="metric-value" id="uppercaseRatio">0</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -893,13 +909,17 @@ Example: The rapid advancement of artificial intelligence has transformed numero
             // Update AI signal score (0-100 scale) - from GAN model
             aiSignal.textContent = data.ai_probability.toFixed(1) + '%';
 
-            // Update the 6 input features used by the GAN model
+            // Update the 10 input features used by the GAN model
             document.getElementById('shannonEntropy').textContent = data.shannon_entropy.toFixed(3);
             document.getElementById('burstiness').textContent = data.burstiness.toFixed(3);
             document.getElementById('lexicalDiversity').textContent = data.lexical_diversity.toFixed(3);
             document.getElementById('wordLengthVar').textContent = data.word_length_variance.toFixed(3);
             document.getElementById('punctDiversity').textContent = data.punctuation_diversity.toFixed(3);
             document.getElementById('vocabRichness').textContent = data.vocabulary_richness.toFixed(3);
+            document.getElementById('avgSentLength').textContent = data.avg_sentence_length.toFixed(3);
+            document.getElementById('sentLengthStd').textContent = data.sentence_length_std.toFixed(3);
+            document.getElementById('specialCharRatio').textContent = data.special_char_ratio.toFixed(3);
+            document.getElementById('uppercaseRatio').textContent = data.uppercase_ratio.toFixed(3);
 
             // Set result class and title
             resultDiv.className = 'result ' + data.prediction;

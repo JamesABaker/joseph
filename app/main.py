@@ -70,6 +70,10 @@ class DetectionResponse(BaseModel):
     word_length_variance: float = Field(..., description="Word length variance (0-1)")
     punctuation_diversity: float = Field(..., description="Punctuation diversity (0-1)")
     vocabulary_richness: float = Field(..., description="Vocabulary richness (0-1)")
+    avg_sentence_length: float = Field(..., description="Average sentence length")
+    sentence_length_std: float = Field(..., description="Sentence length standard deviation")
+    special_char_ratio: float = Field(..., description="Special character ratio")
+    uppercase_ratio: float = Field(..., description="Uppercase letter ratio")
     entropy_ai_probability: float = Field(..., description="Entropy-based AI probability")
     entropy_human_probability: float = Field(..., description="Entropy-based human probability")
 
@@ -200,6 +204,10 @@ def detect_text(
                 word_length_variance=convert_numpy(result["word_length_variance"]),
                 punctuation_diversity=convert_numpy(result["punctuation_diversity"]),
                 vocabulary_richness=convert_numpy(result["vocabulary_richness"]),
+                avg_sentence_length=convert_numpy(result["avg_sentence_length"]),
+                sentence_length_std=convert_numpy(result["sentence_length_std"]),
+                special_char_ratio=convert_numpy(result["special_char_ratio"]),
+                uppercase_ratio=convert_numpy(result["uppercase_ratio"]),
                 entropy_ai_probability=convert_numpy(result["entropy_ai_probability"]),
                 entropy_human_probability=convert_numpy(result["entropy_human_probability"]),
             )
