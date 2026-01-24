@@ -242,13 +242,17 @@ async def get_user_results(
         .all()
     )
 
+    def truncate_text(text: str) -> str:
+        """Truncate text to 100 characters if needed."""
+        if text and len(text) > 100:
+            return text[:100] + "..."
+        return text
+
     return {
         "results": [
             {
                 "id": r.id,
-                "text_analyzed": (
-                    r.text_analyzed[:100] + "..." if len(r.text_analyzed) > 100 else r.text_analyzed
-                ),
+                "text_analyzed": truncate_text(r.text_analyzed),  # type: ignore[arg-type]
                 "human_probability": r.human_probability,
                 "ai_probability": r.ai_probability,
                 "prediction": r.prediction,

@@ -39,6 +39,12 @@ def test_db(test_db_engine):
         session.close()
 
 
+@pytest.fixture(scope="function")
+def db_session(test_db):
+    """Alias for test_db for backwards compatibility."""
+    return test_db
+
+
 @pytest.fixture
 def client(test_db):
     """Create test client with database override."""

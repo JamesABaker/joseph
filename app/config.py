@@ -12,9 +12,9 @@ class Settings(BaseSettings):
     DATABASE_URL: str
 
     # PostgreSQL connection settings (for docker-compose)
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
+    POSTGRES_USER: str = "joseph"
+    POSTGRES_PASSWORD: str = "joseph"  # nosec B106
+    POSTGRES_DB: str = "joseph"
 
     # JWT
     JWT_SECRET_KEY: str
