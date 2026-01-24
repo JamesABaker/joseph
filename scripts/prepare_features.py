@@ -1,9 +1,9 @@
 """
-Extract entropy + RoBERTa features from HC3 dataset for Joseph model training.
+Extract 10 lightweight entropy features from HC3 dataset for Joseph model training.
 
 This script:
 1. Loads HC3 dataset (human vs ChatGPT text pairs)
-2. Extracts 7 entropy features + RoBERTa probability for each sample
+2. Extracts 10 entropy features for each sample (no transformers needed)
 3. Saves as train/val/test parquet files (70/15/15 split)
 """
 
@@ -19,68 +19,52 @@ from datasets import load_dataset  # noqa: E402
 from sklearn.model_selection import train_test_split  # noqa: E402
 from tqdm import tqdm  # noqa: E402
 
-from app.ml_model import AIDetector  # noqa: E402
+from app.entropy_detector import EntropyDetector  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def extract_features_batch(texts, labels, detector, desc="Processing", batch_size=32):
+def extract_features_batch(texts, labels, detector, desc="Processing"):
     """
-    Extract features from texts using entropy detector and RoBERTa with batching.
+    Extract 10 lightweight entropy features from texts.
 
     Args:
         texts: List of text samples
         labels: List of labels (0=human, 1=ai)
-        detector: AIDetector instance
+        detector: EntropyDetector instance
         desc: Progress bar description
-        batch_size: Number of texts to process at once for RoBERTa
 
     Returns:
         DataFrame with features and labels
     """
-    import torch
-
     features_list = []
 
-    # Process in batches for RoBERTa efficiency
-    for i in tqdm(range(0, len(texts), batch_size), desc=desc):
-        batch_texts = texts[i : i + batch_size]
-        batch_labels = labels[i : i + batch_size]
+    # Process each text (entropy features are fast, no need for batching)
+    for text, label in tqdm(zip(texts, labels), total=len(texts), desc=desc):
+        try:
+            # Get entropy features (10 features, no transformers)
+            entropy_results = detector.detect(text)
 
-        # Batch RoBERTa inference
-        inputs = detector.tokenizer(
-            batch_texts, return_tensors="pt", truncation=True, max_length=512, padding=True
-        )
+            # Extract the 10 features we want
+            features = {
+                "shannon_entropy": entropy_results["shannon_entropy"],
+                "burstiness": entropy_results["burstiness"],
+                "lexical_diversity": entropy_results["lexical_diversity"],
+                "word_length_variance": entropy_results["word_length_variance"],
+                "punctuation_diversity": entropy_results["punctuation_diversity"],
+                "vocabulary_richness": entropy_results["vocabulary_richness"],
+                "avg_sentence_length": entropy_results["avg_sentence_length"],
+                "sentence_length_std": entropy_results["sentence_length_std"],
+                "special_char_ratio": entropy_results["special_char_ratio"],
+                "uppercase_ratio": entropy_results["uppercase_ratio"],
+                "label": label,  # 0=human, 1=ai
+            }
+            features_list.append(features)
 
-        with torch.no_grad():
-            outputs = detector.roberta_model(**inputs)
-            probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-            roberta_ai_probs = probs[:, 1].cpu().numpy() * 100
-
-        # Process entropy features individually (can't be easily batched)
-        for j, (text, label) in enumerate(zip(batch_texts, batch_labels)):
-            try:
-                # Get entropy features
-                entropy_results = detector.entropy_detector.detect(text)
-
-                # Extract the 8 features we want
-                features = {
-                    "perplexity": entropy_results["perplexity"],
-                    "shannon_entropy": entropy_results["shannon_entropy"],
-                    "burstiness": entropy_results["burstiness"],
-                    "lexical_diversity": entropy_results["lexical_diversity"],
-                    "word_length_variance": entropy_results["word_length_variance"],
-                    "punctuation_diversity": entropy_results["punctuation_diversity"],
-                    "vocabulary_richness": entropy_results["vocabulary_richness"],
-                    "roberta_ai_prob": roberta_ai_probs[j],
-                    "label": label,  # 0=human, 1=ai
-                }
-                features_list.append(features)
-
-            except Exception as e:
-                logger.warning(f"Failed to process sample (label={label}): {e}")
-                continue
+        except Exception as e:
+            logger.warning(f"Failed to process sample (label={label}): {e}")
+            continue
 
     return pd.DataFrame(features_list)
 
@@ -136,8 +120,8 @@ def main():
     logger.info(f"Test: {len(test_texts)} samples")
 
     # Initialize detector
-    logger.info("Initializing AIDetector (this will download models on first run)...")
-    detector = AIDetector()
+    logger.info("Initializing EntropyDetector (lightweight, no downloads needed)...")
+    detector = EntropyDetector()
 
     # Setup output directory
     output_dir = Path(__file__).parent.parent / "data" / "joseph_training"
@@ -145,9 +129,7 @@ def main():
 
     # Extract and save training set (with checkpoint)
     logger.info("Extracting features from training set...")
-    train_df = extract_features_batch(
-        train_texts, train_labels, detector, "Train set", batch_size=128
-    )
+    train_df = extract_features_batch(train_texts, train_labels, detector, "Train set")
     train_path = output_dir / "train.parquet"
     logger.info(f"Saving training features to {train_path}")
     train_df.to_parquet(train_path, index=False)
@@ -155,7 +137,7 @@ def main():
 
     # Extract and save validation set (with checkpoint)
     logger.info("Extracting features from validation set...")
-    val_df = extract_features_batch(val_texts, val_labels, detector, "Val set", batch_size=128)
+    val_df = extract_features_batch(val_texts, val_labels, detector, "Val set")
     val_path = output_dir / "val.parquet"
     logger.info(f"Saving validation features to {val_path}")
     val_df.to_parquet(val_path, index=False)
@@ -163,7 +145,7 @@ def main():
 
     # Extract and save test set (with checkpoint)
     logger.info("Extracting features from test set...")
-    test_df = extract_features_batch(test_texts, test_labels, detector, "Test set", batch_size=128)
+    test_df = extract_features_batch(test_texts, test_labels, detector, "Test set")
     test_path = output_dir / "test.parquet"
     logger.info(f"Saving test features to {test_path}")
     test_df.to_parquet(test_path, index=False)
