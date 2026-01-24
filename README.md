@@ -17,7 +17,7 @@
 - 🌐 **Web UI + REST API** - easy to use, easy to integrate
 - 💾 **Model caching** - downloads once, runs forever
 
-> ⚠️ **Alpha Model Limitations**: This lightweight model is trained primarily on ChatGPT-3.5 and early GPT-4 data and performs significantly worse on GPT-5 output (F1 score ~0.62).
+> ⚠️ **Alpha Model Limitations**: This lightweight model is trained primarily on ChatGPT-3.5 and early GPT-4 data and performs significantly worse on GPT-5 output (F1 score ~0.62). See [Model Evaluation Report](docs/MODEL_EVALUATION.md) for detailed performance metrics.
 
 ## Quick Start
 
