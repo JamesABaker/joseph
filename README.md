@@ -6,11 +6,11 @@
 
 > *"Too many notes."* — Emperor Joseph II to Mozart
 
-**Joseph** is a hybrid AI text detection system combining machine learning with information theory.
+**Joseph** is a an AI text detection system combining machine learning with information theory.
 
 ## Features
 
-- 🧠 **Hybrid Detection** - combines ML model with entropy analysis for broader insights
+- 🥊 **Generative Adversarial Network (GAN)** - A small model that learns to tell if a sentence was written by a person or by a computer.
 - 📊 **Information Theory** - perplexity, Shannon entropy, burstiness, lexical diversity
   - 🎯 **Sensitive Against Modern LLMs** - entropy features work on GPT-4/GPT-5 output
 - 🐳 **Fully containerized** - runs anywhere with Docker
@@ -85,10 +85,10 @@ uv run pytest -v
 ## Future Enhancements
 
 - [ ] Batch processing API endpoint
-- [ ] API rate limiting
+- [x] API rate limiting
 - [x] User ~2fa~ authentication
 - [ ] Method refinement
-- [ ] Deployment
+- [x] Deployment
 - [x] Volume data persistence for users
 
 
