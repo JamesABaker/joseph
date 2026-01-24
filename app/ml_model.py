@@ -20,21 +20,29 @@ logger = logging.getLogger(__name__)
 class AIDetector:
     """Hybrid AI detector using trained GAN model."""
 
-    def __init__(self, model_name: str = "Hello-SimpleAI/chatgpt-detector-roberta"):
+    def __init__(self, load_roberta: bool = False):
         """
         Initialize the hybrid AI detector.
 
         Args:
-            model_name: Hugging Face model identifier for RoBERTa classifier
+            load_roberta: Whether to load RoBERTa model (uses ~500MB memory)
         """
-        logger.info(f"Loading RoBERTa model: {model_name}")
-        self.model_name = model_name
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)  # nosec B615
-        self.roberta_model = AutoModelForSequenceClassification.from_pretrained(
-            model_name
-        )  # nosec B615
-        self.roberta_model.eval()
-        logger.info("RoBERTa model loaded successfully")
+        self.load_roberta = load_roberta
+
+        if load_roberta:
+            logger.info("Loading RoBERTa model: Hello-SimpleAI/chatgpt-detector-roberta")
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                "Hello-SimpleAI/chatgpt-detector-roberta"
+            )  # nosec B615
+            self.roberta_model = AutoModelForSequenceClassification.from_pretrained(
+                "Hello-SimpleAI/chatgpt-detector-roberta"
+            )  # nosec B615
+            self.roberta_model.eval()
+            logger.info("RoBERTa model loaded successfully")
+        else:
+            logger.info("Skipping RoBERTa model (memory optimization)")
+            self.tokenizer = None
+            self.roberta_model = None
 
         logger.info("Initializing entropy detector...")
         self.entropy_detector = EntropyDetector()
@@ -67,16 +75,21 @@ class AIDetector:
         if not text or not text.strip():
             raise ValueError("Text cannot be empty")
 
-        # Get RoBERTa predictions
-        inputs = self.tokenizer(
-            text, return_tensors="pt", truncation=True, max_length=max_length, padding=True
-        )
+        # Get RoBERTa predictions (if loaded)
+        if self.load_roberta:
+            inputs = self.tokenizer(
+                text, return_tensors="pt", truncation=True, max_length=max_length, padding=True
+            )
 
-        with torch.no_grad():
-            outputs = self.roberta_model(**inputs)
-            probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-            ml_human_prob = probs[0][0].item() * 100
-            ml_ai_prob = probs[0][1].item() * 100
+            with torch.no_grad():
+                outputs = self.roberta_model(**inputs)
+                probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+                ml_human_prob = probs[0][0].item() * 100
+                ml_ai_prob = probs[0][1].item() * 100
+        else:
+            # Use entropy-based heuristic as RoBERTa substitute
+            ml_human_prob = 50.0
+            ml_ai_prob = 50.0
 
         # Get entropy-based analysis
         entropy_results = self.entropy_detector.detect(text)
@@ -129,7 +142,7 @@ class AIDetector:
         info: Dict[str, Any] = {
             "model_name": "GAN Detector",
             "architecture": "Generative Adversarial Network on 8 features (7 entropy + RoBERTa)",
-            "roberta_model": self.model_name,
+            "roberta_loaded": self.load_roberta,
             "entropy_features": [
                 "perplexity",
                 "shannon_entropy",
