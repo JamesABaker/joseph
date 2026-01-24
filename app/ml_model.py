@@ -1,24 +1,24 @@
 """
 Hybrid AI text detection combining ML model with entropy-based features.
-Uses trained Joseph Random Forest model on entropy features + RoBERTa.
+Uses trained GAN detector model on entropy features + RoBERTa.
 """
 
 import logging
 from pathlib import Path
 from typing import Any, Dict
 
-import joblib
 import numpy as np
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from app.entropy_detector import EntropyDetector
+from app.gan_model import GANDetector
 
 logger = logging.getLogger(__name__)
 
 
 class AIDetector:
-    """Hybrid AI detector using trained Joseph Random Forest model."""
+    """Hybrid AI detector using trained GAN model."""
 
     def __init__(self, model_name: str = "Hello-SimpleAI/chatgpt-detector-roberta"):
         """
@@ -40,22 +40,22 @@ class AIDetector:
         self.entropy_detector = EntropyDetector()
         logger.info("Entropy detector ready")
 
-        # Load trained Joseph Random Forest model (REQUIRED)
-        joseph_model_path = Path(__file__).parent.parent / "models" / "joseph_v1.pkl"
-        if not joseph_model_path.exists():
+        # Load trained GAN detector model (REQUIRED)
+        gan_model_path = Path(__file__).parent.parent / "models" / "gan_detector_v1.pt"
+        if not gan_model_path.exists():
             raise FileNotFoundError(
-                f"Joseph model not found at {joseph_model_path}. "
-                "Please run scripts/prepare_features.py and "
-                "scripts/train_joseph_model.py to train the model."
+                f"GAN model not found at {gan_model_path}. "
+                "Please run scripts/train_gan_model.py to train the model."
             )
 
-        logger.info(f"Loading trained Joseph model from {joseph_model_path}")
-        self.joseph_model = joblib.load(joseph_model_path)
-        logger.info("Joseph model loaded successfully")
+        logger.info(f"Loading trained GAN model from {gan_model_path}")
+        self.gan_detector = GANDetector(feature_dim=8)
+        self.gan_detector.load(str(gan_model_path))
+        logger.info("GAN model loaded successfully")
 
     def detect(self, text: str, max_length: int = 512) -> Dict[str, Any]:
         """
-        Hybrid detection using trained Joseph model on entropy + RoBERTa features.
+        Hybrid detection using trained GAN model on entropy + RoBERTa features.
 
         Args:
             text: Input text to analyze
@@ -81,7 +81,7 @@ class AIDetector:
         # Get entropy-based analysis
         entropy_results = self.entropy_detector.detect(text)
 
-        # Prepare features for Joseph model (8 features)
+        # Prepare features for GAN model (8 features)
         features = np.array(
             [
                 [
@@ -97,15 +97,16 @@ class AIDetector:
             ]
         )
 
-        # Get prediction from Joseph model
-        joseph_ai_prob = self.joseph_model.predict_proba(features)[0][1] * 100
-        joseph_human_prob = 100 - joseph_ai_prob
-        prediction = "ai" if joseph_ai_prob > 50 else "human"
+        # Get prediction from GAN model (convert to tensor)
+        features_tensor = torch.tensor(features, dtype=torch.float32)
+        gan_ai_prob = self.gan_detector.predict(features_tensor)[0].item() * 100
+        gan_human_prob = 100 - gan_ai_prob
+        prediction = "ai" if gan_ai_prob > 50 else "human"
 
         return {
-            # Joseph model final scores
-            "human_probability": round(joseph_human_prob, 2),
-            "ai_probability": round(joseph_ai_prob, 2),
+            # GAN model final scores
+            "human_probability": round(gan_human_prob, 2),
+            "ai_probability": round(gan_ai_prob, 2),
             "prediction": prediction,
             # RoBERTa scores
             "ml_human_probability": round(ml_human_prob, 2),
@@ -126,8 +127,8 @@ class AIDetector:
     def get_model_info(self) -> Dict[str, Any]:
         """Get information about the hybrid detector."""
         info: Dict[str, Any] = {
-            "model_name": "Joseph Random Forest",
-            "architecture": "Random Forest on 8 features (7 entropy + RoBERTa)",
+            "model_name": "GAN Detector",
+            "architecture": "Generative Adversarial Network on 8 features (7 entropy + RoBERTa)",
             "roberta_model": self.model_name,
             "entropy_features": [
                 "perplexity",
