@@ -80,6 +80,11 @@ class AIDetector:
             "ai_probability": round(gan_ai_prob, 2),
             "prediction": prediction,
             "text_length": len(text),
+            # ML model scores (same as GAN in lightweight mode)
+            "ml_human_probability": round(gan_human_prob, 2),
+            "ml_ai_probability": round(gan_ai_prob, 2),
+            # Perplexity (not computed in lightweight mode - no GPT-2)
+            "perplexity": 0.0,
             # Entropy metrics
             "shannon_entropy": entropy_results["shannon_entropy"],
             "burstiness": entropy_results["burstiness"],

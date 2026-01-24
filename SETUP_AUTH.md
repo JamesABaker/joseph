@@ -2,6 +2,17 @@
 
 This guide explains how to set up OAuth authentication with GitHub for local testing and development.
 
+## Important: Local vs Production OAuth Apps
+
+**You need separate GitHub OAuth Apps for local and production:**
+
+| Environment | Homepage URL | Callback URL |
+|------------|--------------|--------------|
+| Local | `http://localhost:8000` | `http://localhost:8000/auth/callback` |
+| Render | `https://joseph-viho.onrender.com` | `https://joseph-viho.onrender.com/auth/callback` |
+
+GitHub OAuth apps only support **one callback URL**, so you can't use the same app for both.
+
 ## Prerequisites
 
 - Docker and Docker Compose installed

@@ -21,10 +21,11 @@ COPY app/ ./app/
 # Copy trained Joseph model
 COPY models/ ./models/
 
-# Pre-download the model during build to avoid startup delays
-RUN python -c "from transformers import AutoTokenizer, AutoModelForSequenceClassification; \
-    AutoTokenizer.from_pretrained('Hello-SimpleAI/chatgpt-detector-roberta'); \
-    AutoModelForSequenceClassification.from_pretrained('Hello-SimpleAI/chatgpt-detector-roberta')"
+# Verify the lightweight model loads correctly (no more heavy transformer downloads)
+RUN python -c "from app.gan_model import GANDetector; \
+    model = GANDetector(feature_dim=6); \
+    model.load('models/gan_detector_v1.pt'); \
+    print('Lightweight GAN model loaded successfully')"
 
 # Expose port
 EXPOSE 8000
