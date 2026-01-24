@@ -1,6 +1,7 @@
 """
 Entropy and information theory-based AI text detection.
-Implements perplexity, Shannon entropy, and burstiness analysis.
+Implements Shannon entropy, burstiness, and lexical analysis.
+Lightweight version - no heavy transformer models required.
 """
 
 import logging
@@ -8,8 +9,6 @@ import math
 from typing import Any, Dict
 
 import numpy as np
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -17,62 +16,9 @@ logger = logging.getLogger(__name__)
 class EntropyDetector:
     """Entropy-based AI text detector using information theory metrics."""
 
-    def __init__(self, model_name: str = "gpt2"):
-        """
-        Initialize the entropy detector with a language model for perplexity.
-
-        Args:
-            model_name: Hugging Face model for perplexity calculation (default: gpt2)
-        """
-        logger.info(f"Loading entropy detector with model: {model_name}")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)  # nosec B615
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)  # nosec B615
-        self.model.eval()
-        logger.info("Entropy detector loaded successfully")
-
-    def calculate_perplexity(self, text: str) -> float:
-        """
-        Calculate perplexity of text using the language model.
-        Lower perplexity suggests more predictable (AI-like) text.
-
-        Args:
-            text: Input text to analyze
-
-        Returns:
-            Perplexity score
-        """
-        encodings = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
-
-        max_length = self.model.config.n_positions
-        stride = 512
-        seq_len = encodings.input_ids.size(1)
-
-        nlls = []
-        prev_end_loc = 0
-
-        for begin_loc in range(0, seq_len, stride):
-            end_loc = min(begin_loc + max_length, seq_len)
-            trg_len = end_loc - prev_end_loc
-            input_ids = encodings.input_ids[:, begin_loc:end_loc]
-            target_ids = input_ids.clone()
-            target_ids[:, :-trg_len] = -100
-
-            with torch.no_grad():
-                outputs = self.model(input_ids, labels=target_ids)
-                neg_log_likelihood = outputs.loss
-
-            nlls.append(neg_log_likelihood)
-
-            prev_end_loc = end_loc
-            if end_loc == seq_len:
-                break
-
-        perplexity = torch.exp(torch.stack(nlls).mean()).item()
-
-        # Cap perplexity to prevent overflow in later calculations
-        perplexity = min(perplexity, 1000.0)
-
-        return perplexity
+    def __init__(self):
+        """Initialize the entropy detector (lightweight, no models to load)."""
+        logger.info("Entropy detector initialized (lightweight mode)")
 
     def calculate_shannon_entropy(self, text: str) -> float:
         """
@@ -244,8 +190,7 @@ class EntropyDetector:
         if not text or not text.strip():
             raise ValueError("Text cannot be empty")
 
-        # Calculate all metrics
-        perplexity = self.calculate_perplexity(text)
+        # Calculate all metrics (6 features, no perplexity)
         shannon_entropy = self.calculate_shannon_entropy(text)
         burstiness = self.calculate_burstiness(text)
         lexical_diversity = self.calculate_lexical_diversity(text)
@@ -254,12 +199,6 @@ class EntropyDetector:
         vocab_richness = self.calculate_vocabulary_richness(text)
 
         # Heuristic scoring (these thresholds are approximate and should be tuned)
-        # Lower perplexity = more AI-like (typical AI: 20-50, human: 50-200)
-        # Use clipped exp to prevent overflow
-        exp_arg = (perplexity - 50) / 20
-        exp_arg = max(min(exp_arg, 50), -50)  # Clip to prevent overflow
-        perplexity_score = 1.0 / (1.0 + math.exp(exp_arg))
-
         # Lower entropy = more AI-like
         entropy_score = 1.0 - min(shannon_entropy / 5.0, 1.0)
 
@@ -277,17 +216,15 @@ class EntropyDetector:
 
         # Weighted average - emphasizing the most reliable metrics
         ai_probability = (
-            0.25 * perplexity_score  # Perplexity is very reliable
-            + 0.15 * burstiness_score  # Sentence variation is key
-            + 0.15 * (1.0 - vocab_richness)  # Yule's K is statistically robust
-            + 0.15 * diversity_score  # Type-token ratio
-            + 0.10 * word_var_score  # Word length patterns
-            + 0.10 * entropy_score  # Shannon entropy
+            0.20 * burstiness_score  # Sentence variation is key
+            + 0.20 * (1.0 - vocab_richness)  # Yule's K is statistically robust
+            + 0.20 * diversity_score  # Type-token ratio
+            + 0.15 * word_var_score  # Word length patterns
+            + 0.15 * entropy_score  # Shannon entropy
             + 0.10 * punct_score  # Punctuation usage
         )
 
         return {
-            "perplexity": round(perplexity, 2),
             "shannon_entropy": round(shannon_entropy, 3),
             "burstiness": round(burstiness, 3),
             "lexical_diversity": round(lexical_diversity, 3),

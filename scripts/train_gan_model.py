@@ -10,19 +10,23 @@ This script:
 
 import json
 import logging
-
-# Add parent directory to path to import app modules
 import sys
 from pathlib import Path
 
-import pandas as pd
-import torch
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score
-from tqdm import tqdm
-
+# Add parent directory to path to import app modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.gan_model import GANDetector
+import pandas as pd  # noqa: E402
+import torch  # noqa: E402
+from sklearn.metrics import (  # noqa: E402
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    roc_auc_score,
+)
+from tqdm import tqdm  # noqa: E402
+
+from app.gan_model import GANDetector  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -41,15 +45,14 @@ def load_data(data_dir):
 
 def prepare_features(df):
     """Separate features and labels, convert to tensors."""
+    # Lightweight 6 features (no perplexity or RoBERTa)
     feature_cols = [
-        "perplexity",
         "shannon_entropy",
         "burstiness",
         "lexical_diversity",
         "word_length_variance",
         "punctuation_diversity",
         "vocabulary_richness",
-        "roberta_ai_prob",
     ]
 
     X = torch.FloatTensor(df[feature_cols].values)
@@ -181,8 +184,8 @@ def evaluate_model(detector, val_loader, device="cpu"):
     logger.info("\nConfusion Matrix:")
     cm = confusion_matrix(val_labels, val_preds)
     print(cm)
-    logger.info(f"  [[TN={cm[0,0]}, FP={cm[0,1]}],")
-    logger.info(f"   [FN={cm[1,0]}, TP={cm[1,1]}]]")
+    logger.info(f"  [[TN={cm[0, 0]}, FP={cm[0, 1]}],")
+    logger.info(f"   [FN={cm[1, 0]}, TP={cm[1, 1]}]]")
 
     return {"accuracy": accuracy, "roc_auc": roc_auc}
 
@@ -218,7 +221,7 @@ def main():
     logger.info("Initializing GAN detector...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     detector = GANDetector(
-        feature_dim=8,
+        feature_dim=6,  # 6 lightweight entropy features
         latent_dim=100,
         hidden_dim=128,
         lr_generator=0.0002,
