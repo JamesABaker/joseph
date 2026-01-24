@@ -45,7 +45,7 @@ def load_data(data_dir):
 
 def prepare_features(df):
     """Separate features and labels, convert to tensors."""
-    # Lightweight 6 features (no perplexity or RoBERTa)
+    # Expanded 10 features (lightweight, no transformers)
     feature_cols = [
         "shannon_entropy",
         "burstiness",
@@ -53,6 +53,10 @@ def prepare_features(df):
         "word_length_variance",
         "punctuation_diversity",
         "vocabulary_richness",
+        "avg_sentence_length",
+        "sentence_length_std",
+        "special_char_ratio",
+        "uppercase_ratio",
     ]
 
     X = torch.FloatTensor(df[feature_cols].values)
@@ -221,9 +225,9 @@ def main():
     logger.info("Initializing GAN detector...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     detector = GANDetector(
-        feature_dim=6,  # 6 lightweight entropy features
+        feature_dim=10,  # 10 lightweight entropy features
         latent_dim=100,
-        hidden_dim=128,
+        hidden_dim=256,  # Increased from 128 for more capacity
         lr_generator=0.0002,
         lr_discriminator=0.0001,
     )
@@ -231,7 +235,7 @@ def main():
     # Train model
     logger.info(f"\nTraining on device: {device}")
     history = train_gan_detector(
-        detector, train_loader, val_loader, epochs=50, device=device, checkpoint_dir=models_dir
+        detector, train_loader, val_loader, epochs=200, device=device, checkpoint_dir=models_dir
     )
 
     # Save final model
