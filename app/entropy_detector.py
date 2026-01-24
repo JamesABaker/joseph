@@ -177,6 +177,90 @@ class EntropyDetector:
         # Typical K ranges: 50-300, invert so higher = more diverse
         return max(0, min(1.0, 1.0 - (K / 300.0)))
 
+    def calculate_avg_sentence_length(self, text: str) -> float:
+        """
+        Calculate average sentence length in words.
+        AI tends to produce more consistent sentence lengths.
+
+        Args:
+            text: Input text to analyze
+
+        Returns:
+            Average sentence length (normalized)
+        """
+        sentences = [
+            s.strip() for s in text.replace("!", ".").replace("?", ".").split(".") if s.strip()
+        ]
+
+        if not sentences:
+            return 0.0
+
+        lengths = [len(s.split()) for s in sentences]
+        avg_length = np.mean(lengths)
+        # Normalize: typical range 5-30 words
+        return min(avg_length / 30.0, 1.0)
+
+    def calculate_sentence_length_std(self, text: str) -> float:
+        """
+        Calculate standard deviation of sentence lengths.
+        Human writing has more variation.
+
+        Args:
+            text: Input text to analyze
+
+        Returns:
+            Standard deviation (normalized)
+        """
+        sentences = [
+            s.strip() for s in text.replace("!", ".").replace("?", ".").split(".") if s.strip()
+        ]
+
+        if len(sentences) < 2:
+            return 0.0
+
+        lengths = [len(s.split()) for s in sentences]
+        std_length = np.std(lengths)
+        # Normalize: typical range 0-15
+        return min(std_length / 15.0, 1.0)
+
+    def calculate_special_char_ratio(self, text: str) -> float:
+        """
+        Calculate ratio of special characters (non-alphanumeric, non-space).
+        Can indicate formatting, emphasis patterns.
+
+        Args:
+            text: Input text to analyze
+
+        Returns:
+            Special character ratio (0-1)
+        """
+        if not text:
+            return 0.0
+
+        special_count = sum(1 for c in text if not c.isalnum() and not c.isspace())
+        return min(special_count / len(text), 1.0)
+
+    def calculate_uppercase_ratio(self, text: str) -> float:
+        """
+        Calculate ratio of uppercase letters.
+        Can indicate emphasis patterns or formality.
+
+        Args:
+            text: Input text to analyze
+
+        Returns:
+            Uppercase ratio (0-1)
+        """
+        if not text:
+            return 0.0
+
+        letters = [c for c in text if c.isalpha()]
+        if not letters:
+            return 0.0
+
+        uppercase_count = sum(1 for c in letters if c.isupper())
+        return uppercase_count / len(letters)
+
     def detect(self, text: str) -> Dict[str, Any]:
         """
         Perform comprehensive entropy-based detection.
@@ -190,13 +274,17 @@ class EntropyDetector:
         if not text or not text.strip():
             raise ValueError("Text cannot be empty")
 
-        # Calculate all metrics (6 features, no perplexity)
+        # Calculate all metrics (10 features total)
         shannon_entropy = self.calculate_shannon_entropy(text)
         burstiness = self.calculate_burstiness(text)
         lexical_diversity = self.calculate_lexical_diversity(text)
         word_length_var = self.calculate_word_length_variance(text)
         punct_diversity = self.calculate_punctuation_diversity(text)
         vocab_richness = self.calculate_vocabulary_richness(text)
+        avg_sent_length = self.calculate_avg_sentence_length(text)
+        sent_length_std = self.calculate_sentence_length_std(text)
+        special_char_ratio = self.calculate_special_char_ratio(text)
+        uppercase_ratio = self.calculate_uppercase_ratio(text)
 
         # Heuristic scoring (these thresholds are approximate and should be tuned)
         # Lower entropy = more AI-like
@@ -214,14 +302,20 @@ class EntropyDetector:
         # Lower punctuation diversity = more AI-like
         punct_score = 1.0 - punct_diversity
 
+        # Lower sentence length std = more AI-like
+        sent_std_score = 1.0 - sent_length_std
+
         # Weighted average - emphasizing the most reliable metrics
         ai_probability = (
-            0.20 * burstiness_score  # Sentence variation is key
-            + 0.20 * (1.0 - vocab_richness)  # Yule's K is statistically robust
-            + 0.20 * diversity_score  # Type-token ratio
-            + 0.15 * word_var_score  # Word length patterns
-            + 0.15 * entropy_score  # Shannon entropy
-            + 0.10 * punct_score  # Punctuation usage
+            0.18 * burstiness_score  # Sentence variation is key
+            + 0.18 * (1.0 - vocab_richness)  # Yule's K is statistically robust
+            + 0.15 * diversity_score  # Type-token ratio
+            + 0.12 * word_var_score  # Word length patterns
+            + 0.12 * sent_std_score  # Sentence length variation
+            + 0.10 * entropy_score  # Shannon entropy
+            + 0.08 * punct_score  # Punctuation usage
+            + 0.04 * (1.0 - special_char_ratio)  # Special chars
+            + 0.03 * (1.0 - uppercase_ratio)  # Uppercase patterns
         )
 
         return {
@@ -231,6 +325,10 @@ class EntropyDetector:
             "word_length_variance": round(word_length_var, 3),
             "punctuation_diversity": round(punct_diversity, 3),
             "vocabulary_richness": round(vocab_richness, 3),
+            "avg_sentence_length": round(avg_sent_length, 3),
+            "sentence_length_std": round(sent_length_std, 3),
+            "special_char_ratio": round(special_char_ratio, 3),
+            "uppercase_ratio": round(uppercase_ratio, 3),
             "ai_probability_entropy": round(ai_probability * 100, 2),
             "human_probability_entropy": round((1 - ai_probability) * 100, 2),
         }

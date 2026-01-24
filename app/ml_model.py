@@ -34,7 +34,7 @@ class AIDetector:
             )
 
         logger.info(f"Loading trained GAN model from {gan_model_path}")
-        self.gan_detector = GANDetector(feature_dim=6)
+        self.gan_detector = GANDetector(feature_dim=10)
         self.gan_detector.load(str(gan_model_path))
         logger.info("GAN model loaded successfully")
 
@@ -51,10 +51,10 @@ class AIDetector:
         if not text or not text.strip():
             raise ValueError("Text cannot be empty")
 
-        # Get entropy-based analysis (6 features)
+        # Get entropy-based analysis (10 features)
         entropy_results = self.entropy_detector.detect(text)
 
-        # Prepare features for GAN model (6 features)
+        # Prepare features for GAN model (10 features)
         features = np.array(
             [
                 [
@@ -64,6 +64,10 @@ class AIDetector:
                     entropy_results["word_length_variance"],
                     entropy_results["punctuation_diversity"],
                     entropy_results["vocabulary_richness"],
+                    entropy_results["avg_sentence_length"],
+                    entropy_results["sentence_length_std"],
+                    entropy_results["special_char_ratio"],
+                    entropy_results["uppercase_ratio"],
                 ]
             ]
         )
@@ -92,6 +96,10 @@ class AIDetector:
             "word_length_variance": entropy_results["word_length_variance"],
             "punctuation_diversity": entropy_results["punctuation_diversity"],
             "vocabulary_richness": entropy_results["vocabulary_richness"],
+            "avg_sentence_length": entropy_results["avg_sentence_length"],
+            "sentence_length_std": entropy_results["sentence_length_std"],
+            "special_char_ratio": entropy_results["special_char_ratio"],
+            "uppercase_ratio": entropy_results["uppercase_ratio"],
             # Individual entropy-based probability
             "entropy_ai_probability": entropy_results["ai_probability_entropy"],
             "entropy_human_probability": entropy_results["human_probability_entropy"],
@@ -101,7 +109,7 @@ class AIDetector:
         """Get information about the detector."""
         info: Dict[str, Any] = {
             "model_name": "GAN Detector (Lightweight)",
-            "architecture": "Generative Adversarial Network on 6 entropy features",
+            "architecture": "Generative Adversarial Network on 10 entropy features",
             "memory_usage": "~50MB",
             "entropy_features": [
                 "shannon_entropy",
@@ -110,6 +118,10 @@ class AIDetector:
                 "word_length_variance",
                 "punctuation_diversity",
                 "vocabulary_richness",
+                "avg_sentence_length",
+                "sentence_length_std",
+                "special_char_ratio",
+                "uppercase_ratio",
             ],
             "labels": {"0": "Human-written", "1": "AI-generated"},
         }
