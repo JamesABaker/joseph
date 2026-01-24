@@ -62,6 +62,27 @@ uv run python scripts/evaluate_model.py
 
 **Time estimate:** <1 minute
 
+## GAN Model Training (Optional)
+
+### Train GAN Detector
+```bash
+uv run python scripts/train_gan_model.py
+```
+
+**What it does:**
+- Loads pre-extracted features from joseph_training parquet files
+- Trains adversarial GAN model (Generator + Discriminator)
+- Uses adversarial training to make discriminator robust
+- Saves best model to `models/gan_detector_best.pt` and final to `models/gan_detector_v1.pt`
+- Reports training history and metrics
+
+**Time estimate:** ~5 minutes on CPU (50 epochs)
+
+**Expected Performance:**
+- **Accuracy:** >99.4% on validation set
+- **ROC-AUC:** >0.999
+- The GAN discriminator learns very robust detection patterns through adversarial training
+
 ## Integration with App
 
 Once trained, the model is automatically loaded by `app/ml_model.py`:
@@ -79,6 +100,7 @@ self.joseph_model = joblib.load("models/joseph_v1.pkl")
 scripts/
   prepare_features.py      # Step 1: Extract features from HC3
   train_joseph_model.py    # Step 2: Train Random Forest
+  train_gan_model.py       # Optional: Train GAN detector
   evaluate_model.py        # Step 3: Test set evaluation
 
 data/
@@ -89,7 +111,10 @@ data/
 
 models/
   joseph_v1.pkl            # Trained Random Forest model
+  gan_detector_v1.pt       # Trained GAN model
+  gan_detector_best.pt     # Best GAN model checkpoint
   training_metrics.json    # Validation metrics and feature importances
+  gan_training_history.json # GAN training history
 ```
 
 ## Expected Performance

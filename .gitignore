@@ -46,6 +46,10 @@ Thumbs.db
 # Model cache
 .cache/
 
+# Large model files (train locally, download for deployment)
+models/*.pt
+models/*.pkl
+
 # Logs
 *.log
 
