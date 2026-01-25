@@ -4,7 +4,6 @@ repos:
     rev: 25.11.0
     hooks:
       - id: black
-        language_version: python3.14
         args: [--line-length=100]
 
   # Import sorting with isort
