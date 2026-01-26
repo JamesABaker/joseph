@@ -14,16 +14,6 @@ def detector():
 def test_entropy_detector_init(detector):
     """Test entropy detector initialization."""
     assert detector is not None
-    assert detector.tokenizer is not None
-    assert detector.model is not None
-
-
-def test_calculate_perplexity(detector, sample_texts):
-    """Test perplexity calculation."""
-    perplexity = detector.calculate_perplexity(sample_texts["human"])
-
-    assert perplexity > 0
-    assert isinstance(perplexity, float)
 
 
 def test_calculate_shannon_entropy(detector, sample_texts):
@@ -79,13 +69,16 @@ def test_detect_full_analysis(detector, sample_texts):
     result = detector.detect(sample_texts["human"])
 
     # Check all expected keys are present
-    assert "perplexity" in result
     assert "shannon_entropy" in result
     assert "burstiness" in result
     assert "lexical_diversity" in result
     assert "word_length_variance" in result
     assert "punctuation_diversity" in result
     assert "vocabulary_richness" in result
+    assert "avg_sentence_length" in result
+    assert "sentence_length_std" in result
+    assert "special_char_ratio" in result
+    assert "uppercase_ratio" in result
     assert "ai_probability_entropy" in result
     assert "human_probability_entropy" in result
 
@@ -93,7 +86,6 @@ def test_detect_full_analysis(detector, sample_texts):
     assert abs(result["ai_probability_entropy"] + result["human_probability_entropy"] - 100) < 0.1
 
     # Check ranges
-    assert result["perplexity"] > 0
     assert result["shannon_entropy"] >= 0
     assert 0 <= result["burstiness"] <= 1
     assert 0 <= result["ai_probability_entropy"] <= 100
@@ -117,4 +109,4 @@ def test_detect_short_text(detector, sample_texts):
     result = detector.detect(sample_texts["short"])
 
     assert result is not None
-    assert "perplexity" in result
+    assert "shannon_entropy" in result
