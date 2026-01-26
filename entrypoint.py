@@ -35,13 +35,13 @@ def run_migrations():
         logger.error(f"❌ Migration failed with exit code {e.returncode}")
         logger.error(f"STDOUT: {e.stdout}")
         logger.error(f"STDERR: {e.stderr}")
-        # Don't fail deployment if migration fails (columns might already exist)
-        logger.warning("⚠️  Continuing with deployment despite migration issues")
-        return False
+        # FAIL deployment if migration fails - columns are required
+        logger.error("❌ Cannot start server without required database columns")
+        sys.exit(1)
     except Exception as e:
         logger.error(f"❌ Unexpected error during migration: {e}")
-        logger.warning("⚠️  Continuing with deployment")
-        return False
+        logger.error("❌ Cannot start server without running migrations")
+        sys.exit(1)
 
 
 def start_server():

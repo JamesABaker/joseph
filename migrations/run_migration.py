@@ -32,45 +32,55 @@ logger = logging.getLogger(__name__)
 
 def run_migration():
     """Run the database migration to add new columns."""
-    migration_sql = """
-    -- Add new columns (nullable first to avoid breaking existing rows)
-    ALTER TABLE results ADD COLUMN IF NOT EXISTS avg_sentence_length FLOAT;
-    ALTER TABLE results ADD COLUMN IF NOT EXISTS sentence_length_std FLOAT;
-    ALTER TABLE results ADD COLUMN IF NOT EXISTS special_char_ratio FLOAT;
-    ALTER TABLE results ADD COLUMN IF NOT EXISTS uppercase_ratio FLOAT;
-
-    -- Set default values for existing rows (if any)
-    UPDATE results SET avg_sentence_length = 0.0 WHERE avg_sentence_length IS NULL;
-    UPDATE results SET sentence_length_std = 0.0 WHERE sentence_length_std IS NULL;
-    UPDATE results SET special_char_ratio = 0.0 WHERE special_char_ratio IS NULL;
-    UPDATE results SET uppercase_ratio = 0.0 WHERE uppercase_ratio IS NULL;
-
-    -- Make columns non-nullable after setting defaults
-    ALTER TABLE results ALTER COLUMN avg_sentence_length SET NOT NULL;
-    ALTER TABLE results ALTER COLUMN sentence_length_std SET NOT NULL;
-    ALTER TABLE results ALTER COLUMN special_char_ratio SET NOT NULL;
-    ALTER TABLE results ALTER COLUMN uppercase_ratio SET NOT NULL;
-    """
-
     try:
         logger.info("Starting database migration...")
-        logger.info(f"Database URL: {os.getenv('DATABASE_URL', 'Not set')[:30]}...")
+        db_url = os.getenv("DATABASE_URL", "Not set")
+        logger.info(f"Database URL: {db_url[:50]}...")
 
-        with engine.connect() as conn:
-            # Execute each statement separately
-            statements = [s.strip() for s in migration_sql.split(";") if s.strip()]
+        with engine.begin() as conn:
+            # Check if columns already exist
+            check_sql = """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'results'
+            AND column_name IN ('avg_sentence_length', 'sentence_length_std',
+                                'special_char_ratio', 'uppercase_ratio')
+            """
+            result = conn.execute(text(check_sql))
+            existing_columns = {row[0] for row in result}
 
-            for i, statement in enumerate(statements, 1):
-                logger.info(f"Executing statement {i}/{len(statements)}...")
-                conn.execute(text(statement))
-                conn.commit()
-                logger.info(f"✓ Statement {i} completed")
+            if len(existing_columns) == 4:
+                logger.info("✅ All 4 columns already exist, skipping migration")
+                return True
+
+            logger.info(f"Found {len(existing_columns)} existing columns: {existing_columns}")
+            logger.info("Adding missing columns...")
+
+            # Add columns one by one with better error handling
+            columns_to_add = [
+                ("avg_sentence_length", "DOUBLE PRECISION"),
+                ("sentence_length_std", "DOUBLE PRECISION"),
+                ("special_char_ratio", "DOUBLE PRECISION"),
+                ("uppercase_ratio", "DOUBLE PRECISION"),
+            ]
+
+            for col_name, col_type in columns_to_add:
+                if col_name not in existing_columns:
+                    logger.info(f"Adding column: {col_name}")
+                    conn.execute(
+                        text(f"ALTER TABLE results ADD COLUMN {col_name} {col_type} DEFAULT 0.0")
+                    )
+                    conn.execute(text(f"ALTER TABLE results ALTER COLUMN {col_name} SET NOT NULL"))
+                    logger.info(f"✓ Added {col_name}")
+                else:
+                    logger.info(f"✓ Column {col_name} already exists")
 
         logger.info("✅ Migration completed successfully!")
         return True
 
     except Exception as e:
         logger.error(f"❌ Migration failed: {e}")
+        logger.exception("Full traceback:")
         return False
 
 
