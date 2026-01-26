@@ -19,6 +19,8 @@
 
 > ⚠️ **Alpha Model Limitations**: This lightweight model is trained primarily on ChatGPT-3.5 and early GPT-4 data and performs significantly worse on GPT-5 output (F1 score ~0.62). See [Model Evaluation Report](docs/MODEL_EVALUATION.md) for detailed performance metrics.
 
+![An image showing some AI text being detected with 98% signal strength](docs/images/Screenshot_20260126_165727.png)
+
 ## Quick Start
 
 ### Run with Docker Compose (Recommended)
