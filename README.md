@@ -104,4 +104,3 @@ uv run pytest -v
 ## License
 
 MIT License - feel free to use this project for learning, development, or production.
-# Production-ready
