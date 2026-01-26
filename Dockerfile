@@ -18,14 +18,14 @@ RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/c
 # Copy application code
 COPY app/ ./app/
 
-# Copy trained Joseph model
+# Copy trained model
 COPY models/ ./models/
 
-# Verify the lightweight model loads correctly (no more heavy transformer downloads)
+# Verify the tuned GAN model loads correctly (10 features, no transformers)
 RUN python -c "from app.gan_model import GANDetector; \
-    model = GANDetector(feature_dim=6); \
-    model.load('models/gan_detector_v1.pt'); \
-    print('Lightweight GAN model loaded successfully')"
+    model = GANDetector(feature_dim=10, latent_dim=128, hidden_dim=384); \
+    model.load('models/gan_detector_tuned_best.pt'); \
+    print('Tuned GAN model loaded successfully')"
 
 # Expose port
 EXPOSE 8000

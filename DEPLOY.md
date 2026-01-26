@@ -6,7 +6,7 @@ This guide explains how to deploy the Joseph AI text detector to Render.
 
 1. A [Render account](https://render.com) (free tier available)
 2. GitHub repository connected to Render
-3. Trained model files (`joseph_v1.pkl`) - see [scripts/README.md](../scripts/README.md)
+3. Trained model file (`gan_detector_tuned_best.pt`) - included in repository
 
 ## Quick Deploy
 
@@ -78,25 +78,13 @@ To enable user authentication:
 
 ## Model Files
 
-### Automatic Download (Production)
+The production model (`gan_detector_tuned_best.pt`, ~15MB) is included in the repository at `models/gan_detector_tuned_best.pt`. The application will automatically load it at startup.
 
-Models will be downloaded at startup if not present. Add to your startup command or use a build script:
-
-```python
-# In your app or as a script
-import joblib
-from pathlib import Path
-
-model_path = Path("models/joseph_v1.pkl")
-if not model_path.exists():
-    # Download from your model hosting (e.g., S3, Google Cloud Storage)
-    # Or train locally and upload
-    pass
-```
-
-### Manual Upload
-
-If models are small enough (<500MB), you can include them in your repository:
+**Model specifications:**
+- Architecture: GAN discriminator with 10-feature input
+- Hyperparameters: hidden_dim=384, latent_dim=128
+- Size: 15MB
+- Memory usage: ~80MB RAM at runtime
 
 ```bash
 # Remove from .gitignore temporarily

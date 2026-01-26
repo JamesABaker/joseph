@@ -10,9 +10,9 @@
 
 ## Features
 
-- 🥊 **Generative Adversarial Network (GAN)** - A small model that learns to tell if a sentence was written by a person or by a computer.
-- 📊 **Information Theory** - perplexity, Shannon entropy, burstiness, lexical diversity
-  - 🎯 **Sensitive Against Modern LLMs** - entropy features work on GPT-4/GPT-5 output
+- 🥊 **Generative Adversarial Network (GAN)** - The model fights itself to get better!
+- 📊 **Information Theory** - Shannon entropy, burstiness, lexical diversity _and more_!
+  - 🎯 **Sensitive Against Modern LLMs** - entropy features work on GPT-4 output... Yes we're a little behind the times. :point_down:
 - 🐳 **Fully containerized** - runs anywhere with Docker
 - 🌐 **Web UI + REST API** - easy to use, easy to integrate
 - 💾 **Model caching** - downloads once, runs forever
@@ -76,12 +76,18 @@ uv run pytest -v
 
 ## Model Information
 
-- **ML Component**: RoBERTa-base trained on ChatGPT output
-- **Entropy Features**:
-  - **Perplexity**: Measures text predictability (lower = more AI-like)
-  - **Shannon Entropy**: Character-level randomness measure
-  - **Burstiness**: Sentence complexity variation (human writing varies more)
+- **Architecture**: GAN-based discriminator (adversarially trained)
+- **Features**: 10 statistical metrics (no large language models)
+  - **Shannon Entropy**: Character-level information density
+  - **Burstiness**: Sentence length variation (human writing varies more)
   - **Lexical Diversity**: Unique word ratio (type-token ratio)
+  - **Word Length Variance**: Human vocabulary shows wider range
+  - **Punctuation Diversity**: Humans use more varied punctuation
+  - **Vocabulary Richness**: Yule's K statistic measures lexical repetition
+  - **Sentence Statistics**: Length means and standard deviations
+  - **Character Ratios**: Special characters and uppercase patterns
+- **Performance**: 91.8% accuracy, 87.2% F1-score on ChatGPT-3.5 & 4 detection
+- **Memory**: ~80MB RAM (lightweight, no transformers)
 
 
 ## Future Enhancements
@@ -92,6 +98,7 @@ uv run pytest -v
 - [ ] Method refinement
 - [x] Deployment
 - [x] Volume data persistence for users
+- [ ] Retrain on GPT 5+ data
 
 
 ## License

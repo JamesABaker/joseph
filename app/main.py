@@ -81,18 +81,37 @@ class DetectionResponse(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Load model and create database tables on startup."""
+    import time
+
     global detector
     logger.info("Starting application...")
-    try:
-        # Create database tables
-        Base.metadata.create_all(bind=engine)
-        logger.info("Database tables created")
 
+    # Retry database connection (handles docker-compose DNS race condition)
+    max_retries = 5
+    retry_delay = 2
+
+    for attempt in range(max_retries):
+        try:
+            # Create database tables
+            Base.metadata.create_all(bind=engine)
+            logger.info("Database tables created")
+            break
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.warning(
+                    f"Database connection failed (attempt {attempt + 1}/{max_retries}): {e}"
+                )
+                time.sleep(retry_delay)
+            else:
+                logger.error(f"Failed to connect to database after {max_retries} attempts: {e}")
+                raise
+
+    try:
         # Load ML model
         detector = AIDetector()
         logger.info("Application startup complete")
     except Exception as e:
-        logger.error(f"Failed to start application: {e}")
+        logger.error(f"Failed to load ML model: {e}")
         raise
 
 

@@ -26,17 +26,18 @@ class AIDetector:
         logger.info("Entropy detector ready")
 
         # Load trained GAN detector model (REQUIRED)
-        gan_model_path = Path(__file__).parent.parent / "models" / "gan_detector_v1.pt"
+        gan_model_path = Path(__file__).parent.parent / "models" / "gan_detector_tuned_best.pt"
         if not gan_model_path.exists():
             raise FileNotFoundError(
                 f"GAN model not found at {gan_model_path}. "
-                "Please run scripts/train_gan_model.py to train the model."
+                "Please run scripts/tune_hyperparameters.py to train the model."
             )
 
-        logger.info(f"Loading trained GAN model from {gan_model_path}")
-        self.gan_detector = GANDetector(feature_dim=10)
+        logger.info(f"Loading hyperparameter-tuned GAN model from {gan_model_path}")
+        # Use tuned hyperparameters: hidden_dim=384, latent_dim=128
+        self.gan_detector = GANDetector(feature_dim=10, latent_dim=128, hidden_dim=384)
         self.gan_detector.load(str(gan_model_path))
-        logger.info("GAN model loaded successfully")
+        logger.info("Tuned GAN model loaded successfully")
 
     def detect(self, text: str) -> Dict[str, Any]:
         """
