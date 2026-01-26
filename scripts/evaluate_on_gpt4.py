@@ -87,17 +87,21 @@ def evaluate_joseph_model(features_df, labels, joseph_model):
     logger.info("\nConfusion Matrix:")
     cm = confusion_matrix(labels, predictions)
     print(cm)
-    logger.info(f"  [[TN={cm[0,0]}, FP={cm[0,1]}],")
-    logger.info(f"   [FN={cm[1,0]}, TP={cm[1,1]}]]")
+    logger.info(f"  [[TN={cm[0, 0]}, FP={cm[0, 1]}],")
+    logger.info(f"   [FN={cm[1, 0]}, TP={cm[1, 1]}]]")
 
     # Error analysis
     errors = labels != predictions
-    logger.info(f"\nError Analysis:")
+    logger.info("Error Analysis:")
     logger.info(
         f"  Total errors: {errors.sum()} / {len(labels)} ({errors.sum()/len(labels)*100:.2f}%)"
     )
-    logger.info(f"  False Positives (Human → AI): {cm[0,1]} ({cm[0,1]/(cm[0,0]+cm[0,1])*100:.2f}%)")
-    logger.info(f"  False Negatives (AI → Human): {cm[1,0]} ({cm[1,0]/(cm[1,0]+cm[1,1])*100:.2f}%)")
+    logger.info(
+        f"  False Positives (Human → AI): {cm[0, 1]} ({cm[0, 1]/(cm[0, 0]+cm[0, 1])*100:.2f}%)"
+    )
+    logger.info(
+        f"  False Negatives (AI → Human): {cm[1, 0]} ({cm[1, 0]/(cm[1, 0]+cm[1, 1])*100:.2f}%)"
+    )
 
     return {
         "model": "Joseph Random Forest",
@@ -139,17 +143,21 @@ def evaluate_gan_model(features_df, labels, gan_detector, device="cpu"):
     logger.info("\nConfusion Matrix:")
     cm = confusion_matrix(labels, predictions)
     print(cm)
-    logger.info(f"  [[TN={cm[0,0]}, FP={cm[0,1]}],")
-    logger.info(f"   [FN={cm[1,0]}, TP={cm[1,1]}]]")
+    logger.info(f"  [[TN={cm[0, 0]}, FP={cm[0, 1]}],")
+    logger.info(f"   [FN={cm[1, 0]}, TP={cm[1, 1]}]]")
 
     # Error analysis
     errors = labels != predictions
-    logger.info(f"\nError Analysis:")
+    logger.info("Error Analysis:")
     logger.info(
         f"  Total errors: {errors.sum()} / {len(labels)} ({errors.sum()/len(labels)*100:.2f}%)"
     )
-    logger.info(f"  False Positives (Human → AI): {cm[0,1]} ({cm[0,1]/(cm[0,0]+cm[0,1])*100:.2f}%)")
-    logger.info(f"  False Negatives (AI → Human): {cm[1,0]} ({cm[1,0]/(cm[1,0]+cm[1,1])*100:.2f}%)")
+    logger.info(
+        f"  False Positives (Human → AI): {cm[0, 1]} ({cm[0, 1]/(cm[0, 0]+cm[0, 1])*100:.2f}%)"
+    )
+    logger.info(
+        f"  False Negatives (AI → Human): {cm[1, 0]} ({cm[1, 0]/(cm[1, 0]+cm[1, 1])*100:.2f}%)"
+    )
 
     return {
         "model": "GAN Discriminator",
@@ -222,8 +230,8 @@ def main():
     logger.info(f"\nLoading test data from {test_data_path}...")
     df = pd.read_parquet(test_data_path)
     logger.info(f"Loaded {len(df)} samples")
-    logger.info(f"  Human: {(df['label']==0).sum()}")
-    logger.info(f"  AI: {(df['label']==1).sum()}")
+    logger.info(f"  Human: {(df['label'] == 0).sum()}")
+    logger.info(f"  AI: {(df['label'] == 1).sum()}")
 
     # Initialize detectors for feature extraction
     logger.info("\nInitializing detectors...")
@@ -234,14 +242,14 @@ def main():
         df["text"].tolist(), ai_detector.entropy_detector, ai_detector
     )
 
-    logger.info(f"\nFeature statistics:")
+    logger.info("Feature statistics:")
     logger.info(
-        f"  Perplexity - Human: {features_df[df['label']==0]['perplexity'].mean():.2f}, "
-        f"AI: {features_df[df['label']==1]['perplexity'].mean():.2f}"
+        f"  Perplexity - Human: {features_df[df['label'] == 0]['perplexity'].mean():.2f}, "
+        f"AI: {features_df[df['label'] == 1]['perplexity'].mean():.2f}"
     )
     logger.info(
-        f"  RoBERTa AI% - Human: {features_df[df['label']==0]['roberta_ai_prob'].mean():.2f}%, "
-        f"AI: {features_df[df['label']==1]['roberta_ai_prob'].mean():.2f}%"
+        f"  RoBERTa AI% - Human: {features_df[df['label'] == 0]['roberta_ai_prob'].mean():.2f}%, "
+        f"AI: {features_df[df['label'] == 1]['roberta_ai_prob'].mean():.2f}%"
     )
 
     # Evaluate Joseph model
