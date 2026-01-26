@@ -12,7 +12,7 @@
 
 - 🥊 **Generative Adversarial Network (GAN)** - The model fights itself to get better!
 - 📊 **Information Theory** - Shannon entropy, burstiness, lexical diversity _and more_!
-  - 🎯 **Sensitive Against Modern LLMs** - entropy features work on GPT-4 output... Yes we're a little behind the times. :point_down:
+  - 🎯 **Sensitive Against Modern LLMs** - entropy features work on GPT-3.5 output... Yes we're a little behind the times. :point_down:
 - 🐳 **Fully containerized** - runs anywhere with Docker
 - 🌐 **Web UI + REST API** - easy to use, easy to integrate
 - 💾 **Model caching** - downloads once, runs forever
