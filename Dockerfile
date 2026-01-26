@@ -12,14 +12,21 @@ COPY pyproject.toml .
 
 # Install dependencies (production only, no training deps)
 # Install PyTorch CPU-only first to avoid CUDA dependencies
-RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu && \
-    uv pip install --system .
+# Use --no-cache to reduce build size
+RUN uv pip install --system --no-cache torch --index-url https://download.pytorch.org/whl/cpu && \
+    uv pip install --system --no-cache .
 
 # Copy application code
 COPY app/ ./app/
 
 # Copy trained model
 COPY models/ ./models/
+
+# Copy migrations
+COPY migrations/ ./migrations/
+
+# Copy entrypoint script
+COPY entrypoint.py ./entrypoint.py
 
 # Verify the tuned GAN model loads correctly (10 features, no transformers)
 RUN python -c "from app.gan_model import GANDetector; \
@@ -30,5 +37,5 @@ RUN python -c "from app.gan_model import GANDetector; \
 # Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the entrypoint script (migrations + application)
+CMD ["python", "entrypoint.py"]
