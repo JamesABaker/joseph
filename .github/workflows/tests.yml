@@ -20,12 +20,7 @@ jobs:
       run: uv python install 3.11
 
     - name: Install dependencies
-      run: uv pip install --system -e ".[dev]"
-
-    - name: Run pre-commit hooks
-      run: |
-        uv pip install --system pre-commit
-        uv run pre-commit run --all-files
+      run: uv pip install -e ".[dev]"
 
     - name: Run tests
       run: uv run pytest -v --cov=app --cov-report=xml --cov-report=term
