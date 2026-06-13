@@ -43,6 +43,11 @@ environment-locked.yml
 .DS_Store
 Thumbs.db
 
+# SQLite databases (local/test only — never commit real data)
+*.db
+*.sqlite
+*.sqlite3
+
 # Model cache
 .cache/
 

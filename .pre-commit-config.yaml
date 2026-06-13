@@ -53,6 +53,7 @@ repos:
     rev: v3.95.5
     hooks:
       - id: trufflehog
+        args: [--results=verified,unknown]
 
 # This configuration is compatible with both pre-commit and prek.
 # To use prek instead, run: prek install

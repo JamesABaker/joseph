@@ -22,7 +22,9 @@ from pathlib import Path
 
 # Set default values for required config before importing app
 os.environ.setdefault("JWT_SECRET_KEY", os.getenv("JWT_SECRET_KEY", "default-init-key"))
-os.environ.setdefault("OAUTH_REDIRECT_URI", os.getenv("OAUTH_REDIRECT_URI", "http://localhost:8000/auth/callback"))
+os.environ.setdefault(
+    "OAUTH_REDIRECT_URI", os.getenv("OAUTH_REDIRECT_URI", "http://localhost:8000/auth/callback")
+)
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -151,7 +153,9 @@ def run_migrations():
                                 f"ALTER TABLE results ADD COLUMN {col_name} {col_type} DEFAULT 0.0"
                             )
                         )
-                        conn.execute(text(f"ALTER TABLE results ALTER COLUMN {col_name} SET NOT NULL"))
+                        conn.execute(
+                            text(f"ALTER TABLE results ALTER COLUMN {col_name} SET NOT NULL")
+                        )
                         logger.info(f"✓ Added {col_name}")
                     except ProgrammingError as e:
                         if "already exists" in str(e):
