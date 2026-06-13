@@ -14,9 +14,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.database import Base, get_db
-
-
+from app.database import Base, get_db  # noqa: E402
 from app.main import app  # noqa: E402
 
 
@@ -74,6 +72,10 @@ def client(test_db):
             "word_length_variance": 0.5,
             "punctuation_diversity": 0.4,
             "vocabulary_richness": 0.8,
+            "avg_sentence_length": 15.0,
+            "sentence_length_std": 5.0,
+            "special_char_ratio": 0.02,
+            "uppercase_ratio": 0.05,
             "entropy_ai_probability": 30.0,
             "entropy_human_probability": 70.0,
         }
@@ -106,6 +108,10 @@ def mock_detector():
         "word_length_variance": 0.5,
         "punctuation_diversity": 0.4,
         "vocabulary_richness": 0.8,
+        "avg_sentence_length": 15.0,
+        "sentence_length_std": 5.0,
+        "special_char_ratio": 0.02,
+        "uppercase_ratio": 0.05,
         "entropy_ai_probability": 30.0,
         "entropy_human_probability": 70.0,
     }

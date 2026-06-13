@@ -3,10 +3,11 @@ Authentication routes for OAuth login and token management.
 """
 
 import logging
+import secrets
 import urllib.parse
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -42,20 +43,33 @@ async def login_github():
     if not settings.GITHUB_CLIENT_ID:
         raise HTTPException(status_code=501, detail="GitHub OAuth not configured")
 
+    state = secrets.token_urlsafe(32)
+    secure = settings.OAUTH_REDIRECT_URI.startswith("https://")
+
     github_auth_url = (
         f"https://github.com/login/oauth/authorize?"
         f"client_id={settings.GITHUB_CLIENT_ID}&"
-        f"redirect_uri={settings.OAUTH_REDIRECT_URI}&"
+        f"redirect_uri={urllib.parse.quote(settings.OAUTH_REDIRECT_URI, safe='')}&"
         f"scope=read:user user:email&"
-        f"state=github"
+        f"state={state}"
     )
-    return RedirectResponse(github_auth_url)
+    response = RedirectResponse(github_auth_url)
+    response.set_cookie(
+        key="oauth_state",
+        value=state,
+        httponly=True,
+        secure=secure,
+        samesite="lax",
+        max_age=300,
+    )
+    return response
 
 
 @router.get("/callback")
 async def oauth_callback(
     code: str = Query(...),
     state: str = Query(...),
+    request: Request = None,
     db: Session = Depends(get_db),
 ):
     """
@@ -63,12 +77,14 @@ async def oauth_callback(
 
     Args:
         code: Authorization code from OAuth provider
-        state: State parameter (should be 'github')
+        state: State parameter for CSRF verification
+        request: HTTP request (for reading state cookie)
         db: Database session
     """
     try:
-        if state != "github":
-            raise HTTPException(status_code=400, detail="Invalid OAuth provider")
+        expected_state = request.cookies.get("oauth_state") if request else None
+        if not expected_state or not secrets.compare_digest(expected_state, state):
+            raise HTTPException(status_code=400, detail="Invalid OAuth state")
 
         user_data = await _handle_github_callback(code)
 
@@ -98,8 +114,13 @@ async def oauth_callback(
             f"&token_type=bearer"
             f"&user={user_json}"
         )
-        return RedirectResponse(redirect_url)
+        secure = settings.OAUTH_REDIRECT_URI.startswith("https://")
+        redirect = RedirectResponse(redirect_url)
+        redirect.delete_cookie("oauth_state", httponly=True, secure=secure, samesite="lax")
+        return redirect
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"OAuth callback error: {e}")
         raise HTTPException(status_code=500, detail="Authentication failed")

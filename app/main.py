@@ -7,9 +7,12 @@ import logging
 import os
 from typing import Optional
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
@@ -24,12 +27,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+limiter = Limiter(key_func=get_remote_address)
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Joseph - AI Text Detector API",
     description="Ensemble analysis of ML and entropy-based methods to detect AI-generated text.",
     version="2.0.0",
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Include auth routes
 app.include_router(auth_routes.router)
@@ -41,7 +48,7 @@ detector: Optional[AIDetector] = None
 class DetectionRequest(BaseModel):
     """Request model for text detection."""
 
-    text: str = Field(..., min_length=1, description="Text to analyze")
+    text: str = Field(..., min_length=1, max_length=50_000, description="Text to analyze")
 
     class Config:
         json_schema_extra = {
@@ -173,8 +180,10 @@ async def model_info():
 
 
 @app.post("/api/detect", response_model=DetectionResponse)
+@limiter.limit("20/minute")
 def detect_text(
-    request: DetectionRequest,
+    request: Request,
+    body: DetectionRequest,
     current_user: Optional[User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db),
 ):
@@ -183,7 +192,8 @@ def detect_text(
     Authentication is optional. If authenticated, saves result to user's history.
 
     Args:
-        request: DetectionRequest containing the text to analyze
+        request: HTTP request (used for rate limiting)
+        body: DetectionRequest containing the text to analyze
         current_user: Authenticated user from JWT token (optional)
         db: Database session
 
@@ -194,8 +204,8 @@ def detect_text(
         raise HTTPException(status_code=503, detail="Model not loaded")
 
     try:
-        result = detector.detect(request.text)
-        result["text_length"] = len(request.text)
+        result = detector.detect(body.text)
+        result["text_length"] = len(body.text)
 
         # Convert numpy types to Python native types for database compatibility
         def convert_numpy(obj):
@@ -210,7 +220,7 @@ def detect_text(
         if current_user:
             db_result = Result(
                 user_id=current_user.id,
-                text_analyzed=request.text,
+                text_analyzed=body.text,
                 human_probability=convert_numpy(result["human_probability"]),
                 ai_probability=convert_numpy(result["ai_probability"]),
                 prediction=result["prediction"],
@@ -245,8 +255,8 @@ def detect_text(
 async def get_user_results(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    limit: int = 50,
-    offset: int = 0,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
 ):
     """
     Get detection results history for the current user.
