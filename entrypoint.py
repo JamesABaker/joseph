@@ -15,32 +15,32 @@ logger = logging.getLogger(__name__)
 
 
 def run_migrations():
-    """Run database migrations."""
+    """Run database initialization and migrations."""
     logger.info("🚀 Starting deployment process...")
-    logger.info("📊 Running database migrations...")
+    logger.info("🗄️ Initializing database...")
 
-    migration_script = Path(__file__).parent / "migrations" / "run_migration.py"
+    init_script = Path(__file__).parent / "migrations" / "init_db.py"
 
     try:
         result = subprocess.run(  # nosec B603
-            [sys.executable, str(migration_script)],
+            [sys.executable, str(init_script)],
             capture_output=True,
             text=True,
             check=True,
         )
         logger.info(result.stdout)
-        logger.info("✅ Migrations completed successfully")
+        logger.info("✅ Database initialization completed successfully")
         return True
     except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Migration failed with exit code {e.returncode}")
+        logger.error(f"❌ Database initialization failed with exit code {e.returncode}")
         logger.error(f"STDOUT: {e.stdout}")
         logger.error(f"STDERR: {e.stderr}")
-        # FAIL deployment if migration fails - columns are required
-        logger.error("❌ Cannot start server without required database columns")
+        # FAIL deployment if initialization fails - database is required
+        logger.error("❌ Cannot start server without database initialization")
         sys.exit(1)
     except Exception as e:
-        logger.error(f"❌ Unexpected error during migration: {e}")
-        logger.error("❌ Cannot start server without running migrations")
+        logger.error(f"❌ Unexpected error during database initialization: {e}")
+        logger.error("❌ Cannot start server without database initialization")
         sys.exit(1)
 
 
