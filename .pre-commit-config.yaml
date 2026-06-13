@@ -1,25 +1,12 @@
 repos:
-  # Code formatting with Black
-  - repo: https://github.com/psf/black
-    rev: 25.11.0
+  # Code formatting and linting with Ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
     hooks:
-      - id: black
-        language_version: python3.12
+      - id: ruff
+        args: [--fix, --line-length=100]
+      - id: ruff-format
         args: [--line-length=100]
-
-  # Import sorting with isort
-  - repo: https://github.com/pycqa/isort
-    rev: 7.0.0
-    hooks:
-      - id: isort
-        args: [--profile=black, --line-length=100]
-
-  # Linting with flake8
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
-    hooks:
-      - id: flake8
-        args: [--max-line-length=100, --extend-ignore=E203]
 
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -60,3 +47,7 @@ repos:
       - id: bandit
         args: [-c, pyproject.toml]
         additional_dependencies: ["bandit[toml]"]
+
+# This configuration is compatible with both pre-commit and prek.
+# To use prek instead, run: prek install
+# prek is a faster, dependency-free alternative: https://prek.j178.dev/

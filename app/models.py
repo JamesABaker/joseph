@@ -58,6 +58,10 @@ class Result(Base):
     word_length_variance = Column(Float, nullable=False)
     punctuation_diversity = Column(Float, nullable=False)
     vocabulary_richness = Column(Float, nullable=False)
+    avg_sentence_length = Column(Float, nullable=False)
+    sentence_length_std = Column(Float, nullable=False)
+    special_char_ratio = Column(Float, nullable=False)
+    uppercase_ratio = Column(Float, nullable=False)
     entropy_ai_probability = Column(Float, nullable=False)
     entropy_human_probability = Column(Float, nullable=False)
 

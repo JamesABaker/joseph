@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: joseph
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OAUTH_GITHUB_CLIENT_ID
+        sync: false
+      - key: OAUTH_GITHUB_CLIENT_SECRET
+        sync: false
+    healthCheckPath: /health
+    autoDeploy: true

@@ -70,6 +70,10 @@ class DetectionResponse(BaseModel):
     word_length_variance: float = Field(..., description="Word length variance (0-1)")
     punctuation_diversity: float = Field(..., description="Punctuation diversity (0-1)")
     vocabulary_richness: float = Field(..., description="Vocabulary richness (0-1)")
+    avg_sentence_length: float = Field(..., description="Average sentence length")
+    sentence_length_std: float = Field(..., description="Sentence length standard deviation")
+    special_char_ratio: float = Field(..., description="Special character ratio")
+    uppercase_ratio: float = Field(..., description="Uppercase letter ratio")
     entropy_ai_probability: float = Field(..., description="Entropy-based AI probability")
     entropy_human_probability: float = Field(..., description="Entropy-based human probability")
 
@@ -77,18 +81,37 @@ class DetectionResponse(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Load model and create database tables on startup."""
+    import time
+
     global detector
     logger.info("Starting application...")
-    try:
-        # Create database tables
-        Base.metadata.create_all(bind=engine)
-        logger.info("Database tables created")
 
+    # Retry database connection (handles docker-compose DNS race condition)
+    max_retries = 5
+    retry_delay = 2
+
+    for attempt in range(max_retries):
+        try:
+            # Create database tables
+            Base.metadata.create_all(bind=engine)
+            logger.info("Database tables created")
+            break
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.warning(
+                    f"Database connection failed (attempt {attempt + 1}/{max_retries}): {e}"
+                )
+                time.sleep(retry_delay)
+            else:
+                logger.error(f"Failed to connect to database after {max_retries} attempts: {e}")
+                raise
+
+    try:
         # Load ML model
         detector = AIDetector()
         logger.info("Application startup complete")
     except Exception as e:
-        logger.error(f"Failed to start application: {e}")
+        logger.error(f"Failed to load ML model: {e}")
         raise
 
 
@@ -200,6 +223,10 @@ def detect_text(
                 word_length_variance=convert_numpy(result["word_length_variance"]),
                 punctuation_diversity=convert_numpy(result["punctuation_diversity"]),
                 vocabulary_richness=convert_numpy(result["vocabulary_richness"]),
+                avg_sentence_length=convert_numpy(result["avg_sentence_length"]),
+                sentence_length_std=convert_numpy(result["sentence_length_std"]),
+                special_char_ratio=convert_numpy(result["special_char_ratio"]),
+                uppercase_ratio=convert_numpy(result["uppercase_ratio"]),
                 entropy_ai_probability=convert_numpy(result["entropy_ai_probability"]),
                 entropy_human_probability=convert_numpy(result["entropy_human_probability"]),
             )
@@ -242,13 +269,17 @@ async def get_user_results(
         .all()
     )
 
+    def truncate_text(text: str) -> str:
+        """Truncate text to 100 characters if needed."""
+        if text and len(text) > 100:
+            return text[:100] + "..."
+        return text
+
     return {
         "results": [
             {
                 "id": r.id,
-                "text_analyzed": (
-                    r.text_analyzed[:100] + "..." if len(r.text_analyzed) > 100 else r.text_analyzed
-                ),
+                "text_analyzed": truncate_text(r.text_analyzed),  # type: ignore[arg-type]
                 "human_probability": r.human_probability,
                 "ai_probability": r.ai_probability,
                 "prediction": r.prediction,

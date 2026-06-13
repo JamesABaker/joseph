@@ -12,22 +12,24 @@ COPY pyproject.toml .
 
 # Install dependencies (production only, no training deps)
 # Install PyTorch CPU-only first to avoid CUDA dependencies
-RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu && \
-    uv pip install --system .
+# Use --no-cache to reduce build size
+RUN uv pip install --system --no-cache torch --index-url https://download.pytorch.org/whl/cpu && \
+    uv pip install --system --no-cache .
 
 # Copy application code
 COPY app/ ./app/
 
-# Copy trained Joseph model
+# Copy trained model
 COPY models/ ./models/
 
-# Pre-download the model during build to avoid startup delays
-RUN python -c "from transformers import AutoTokenizer, AutoModelForSequenceClassification; \
-    AutoTokenizer.from_pretrained('Hello-SimpleAI/chatgpt-detector-roberta'); \
-    AutoModelForSequenceClassification.from_pretrained('Hello-SimpleAI/chatgpt-detector-roberta')"
+# Copy migrations
+COPY migrations/ ./migrations/
+
+# Copy entrypoint script
+COPY entrypoint.py ./entrypoint.py
 
 # Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the entrypoint script (migrations + application)
+CMD ["python", "entrypoint.py"]

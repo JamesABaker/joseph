@@ -1,0 +1,10 @@
+{
+  "hidden_dim": 384,
+  "latent_dim": 128,
+  "lr_generator": 0.0003,
+  "lr_discriminator": 0.00015,
+  "epochs": 250,
+  "accuracy": 0.9181577596081685,
+  "f1": 0.8720987654320987,
+  "auc": 0.9713772295889057
+}

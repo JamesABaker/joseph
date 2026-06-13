@@ -542,7 +542,7 @@
         <div class="container">
             <a href="https://github.com/JamesABaker/joseph" class="alpha-badge" target="_blank" rel="noopener noreferrer">ALPHA</a>
             <h1>Joseph</h1>
-            <p class="subtitle">🤖 Hybrid analysis for sensitive AI detection</p>
+            <p class="subtitle">🤖 Hybrid analysis for sensitive GPT 3.5 detection</p>
 
         <textarea id="textInput"
             placeholder="Paste or type text here to analyze...
@@ -575,28 +575,15 @@ Example: The rapid advancement of artificial intelligence has transformed numero
             </div>
 
             <div class="metrics">
-                <h3>📊 Analysis Details</h3>
+                <h3>📊 Input Features (GAN Model)</h3>
                 <div class="metric-grid">
                     <div class="metric-item">
-                        <div class="metric-label">GPT 2 <a href="https://huggingface.co/Hello-SimpleAI/chatgpt-detector-roberta"
-                    target="_blank">RoBERTa</a></div>
-                        <div class="metric-value" id="mlScore">0%</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">Entropy Score</div>
-                        <div class="metric-value" id="entropyScore">0%</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">Perplexity</div>
-                        <div class="metric-value" id="perplexity">0</div>
+                        <div class="metric-label">Shannon Entropy</div>
+                        <div class="metric-value" id="shannonEntropy">0</div>
                     </div>
                     <div class="metric-item">
                         <div class="metric-label">Burstiness</div>
                         <div class="metric-value" id="burstiness">0</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">Shannon Entropy</div>
-                        <div class="metric-value" id="shannonEntropy">0</div>
                     </div>
                     <div class="metric-item">
                         <div class="metric-label">Lexical Diversity</div>
@@ -613,6 +600,22 @@ Example: The rapid advancement of artificial intelligence has transformed numero
                     <div class="metric-item">
                         <div class="metric-label">Vocab Richness</div>
                         <div class="metric-value" id="vocabRichness">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Avg Sent Length</div>
+                        <div class="metric-value" id="avgSentLength">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Sent Length Std</div>
+                        <div class="metric-value" id="sentLengthStd">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Special Char Ratio</div>
+                        <div class="metric-value" id="specialCharRatio">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Uppercase Ratio</div>
+                        <div class="metric-value" id="uppercaseRatio">0</div>
                     </div>
                 </div>
             </div>
@@ -903,19 +906,20 @@ Example: The rapid advancement of artificial intelligence has transformed numero
             const resultTitle = document.getElementById('resultTitle');
             const aiSignal = document.getElementById('aiSignal');
 
-            // Update AI signal score (0-100 scale)
+            // Update AI signal score (0-100 scale) - from GAN model
             aiSignal.textContent = data.ai_probability.toFixed(1) + '%';
 
-            // Update metrics
-            document.getElementById('mlScore').textContent = data.ml_ai_probability.toFixed(1) + '% AI';
-            document.getElementById('entropyScore').textContent = data.entropy_ai_probability.toFixed(1) + '% AI';
-            document.getElementById('perplexity').textContent = data.perplexity.toFixed(1);
-            document.getElementById('burstiness').textContent = data.burstiness.toFixed(3);
+            // Update the 10 input features used by the GAN model
             document.getElementById('shannonEntropy').textContent = data.shannon_entropy.toFixed(3);
+            document.getElementById('burstiness').textContent = data.burstiness.toFixed(3);
             document.getElementById('lexicalDiversity').textContent = data.lexical_diversity.toFixed(3);
             document.getElementById('wordLengthVar').textContent = data.word_length_variance.toFixed(3);
             document.getElementById('punctDiversity').textContent = data.punctuation_diversity.toFixed(3);
             document.getElementById('vocabRichness').textContent = data.vocabulary_richness.toFixed(3);
+            document.getElementById('avgSentLength').textContent = data.avg_sentence_length.toFixed(3);
+            document.getElementById('sentLengthStd').textContent = data.sentence_length_std.toFixed(3);
+            document.getElementById('specialCharRatio').textContent = data.special_char_ratio.toFixed(3);
+            document.getElementById('uppercaseRatio').textContent = data.uppercase_ratio.toFixed(3);
 
             // Set result class and title
             resultDiv.className = 'result ' + data.prediction;
