@@ -802,26 +802,40 @@ Example: The rapid advancement of artificial intelligence has transformed numero
 
         function displayHistory(results) {
             const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
 
             if (results.length === 0) {
-                historyList.innerHTML = '<p style="color: #666;">No detection history yet. Run your first analysis above!</p>';
+                const p = document.createElement('p');
+                p.style.color = '#666';
+                p.textContent = 'No detection history yet. Run your first analysis above!';
+                historyList.appendChild(p);
                 return;
             }
 
-            historyList.innerHTML = results.map(result => `
-                <div class="history-item" onclick="loadHistoryItem(${result.id})">
-                    <div style="font-weight: 700;">
-                        ${result.prediction === 'ai' ? '⚠️ AI-Generated' : '✅ No AI Signal'}
-                        (${result.ai_probability.toFixed(1)}% AI)
-                    </div>
-                    <div style="margin-top: 5px; font-size: 0.9em;">
-                        "${result.text_analyzed}"
-                    </div>
-                    <div class="history-meta">
-                        ${new Date(result.created_at).toLocaleString()}
-                    </div>
-                </div>
-            `).join('');
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.addEventListener('click', () => loadHistoryItem(result.id));
+
+                const header = document.createElement('div');
+                header.style.fontWeight = '700';
+                header.textContent = (result.prediction === 'ai' ? '⚠️ AI-Generated' : '✅ No AI Signal') +
+                    ` (${result.ai_probability.toFixed(1)}% AI)`;
+
+                const snippet = document.createElement('div');
+                snippet.style.marginTop = '5px';
+                snippet.style.fontSize = '0.9em';
+                snippet.textContent = `"${result.text_analyzed}"`;
+
+                const meta = document.createElement('div');
+                meta.className = 'history-meta';
+                meta.textContent = new Date(result.created_at).toLocaleString();
+
+                item.appendChild(header);
+                item.appendChild(snippet);
+                item.appendChild(meta);
+                historyList.appendChild(item);
+            });
         }
 
         async function loadHistoryItem(resultId) {
