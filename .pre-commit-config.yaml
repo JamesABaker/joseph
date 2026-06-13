@@ -31,7 +31,7 @@ repos:
       - id: check-added-large-files
         name: prevent .env from being committed
         args: ['--maxkb=0']
-        files: '^\.env$'
+        files: '^\.env'
 
   # Dockerfile linting
   - repo: https://github.com/hadolint/hadolint
@@ -47,6 +47,12 @@ repos:
       - id: bandit
         args: [-c, pyproject.toml]
         additional_dependencies: ["bandit[toml]"]
+
+  # Secret scanning with TruffleHog
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.95.5
+    hooks:
+      - id: trufflehog
 
 # This configuration is compatible with both pre-commit and prek.
 # To use prek instead, run: prek install
