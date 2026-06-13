@@ -4,14 +4,17 @@ import os
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+# Set test environment variables before importing app
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-local-testing-only"
+os.environ["OAUTH_REDIRECT_URI"] = "http://localhost:8000/auth/callback"
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.database import Base, get_db
-
-# Set test environment variables before importing app
-os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
 
 from app.main import app  # noqa: E402
