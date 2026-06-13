@@ -1,7 +1,7 @@
 # Joseph
 
 [![Docker Build](https://github.com/JamesABaker/verif/actions/workflows/docker.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/docker.yml)
-[![pre-commit](https://github.com/JamesABaker/verif/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/pre-commit.yml)
+[![prek](https://github.com/JamesABaker/verif/actions/workflows/prek.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/prek.yml)
 [![Tests](https://github.com/JamesABaker/verif/actions/workflows/tests.yml/badge.svg)](https://github.com/JamesABaker/verif/actions/workflows/tests.yml)
 
 > *"Too many notes."* — Emperor Joseph II to Mozart
@@ -68,8 +68,8 @@ uv pip install -e ".[training]"
 # For development and testing
 uv pip install -e ".[dev]"
 
-# Install pre-commit hooks
-pre-commit install
+# Install prek hooks (drop-in replacement for pre-commit)
+prek install
 
 # Run tests
 uv run pytest -v

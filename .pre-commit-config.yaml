@@ -59,3 +59,7 @@ repos:
       - id: bandit
         args: [-c, pyproject.toml]
         additional_dependencies: ["bandit[toml]"]
+
+# This configuration is compatible with both pre-commit and prek.
+# To use prek instead, run: prek install
+# prek is a faster, dependency-free alternative: https://prek.j178.dev/
