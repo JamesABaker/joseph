@@ -60,6 +60,10 @@ Thumbs.db
 
 #Data
 data/
+*.pdf
+*.png
+*.parquet
+*.csv
 
 # Environment variables
 .env
