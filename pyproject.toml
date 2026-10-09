@@ -25,7 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 training = [
     "pandas>=2.2.0",
-    "datasets>=5.0.1",
+    "datasets>=5.1.0",
     "tqdm>=4.67.0",
     "pyarrow>=18.0.0",
 ]
