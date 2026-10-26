@@ -2,6 +2,8 @@
 Authentication utilities for OAuth and JWT token management.
 """
 
+import hashlib
+import secrets
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -9,7 +11,7 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.models import User
+from app.models import RefreshToken, User
 
 
 def create_access_token(data: dict) -> str:
@@ -21,10 +23,10 @@ def create_access_token(data: dict) -> str:
 
 
 def create_refresh_token(data: dict) -> str:
-    """Create a JWT refresh token."""
+    """Create a JWT refresh token. Each token is unique via a random jti claim."""
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    to_encode.update({"exp": expire, "type": "refresh"})
+    to_encode.update({"exp": expire, "type": "refresh", "jti": secrets.token_urlsafe(16)})
     return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 
@@ -46,6 +48,75 @@ def verify_token(token: str, token_type: str = "access") -> Optional[dict]:  # n
         return payload
     except JWTError:
         return None
+
+
+def _hash_token(token: str) -> str:
+    """Return the SHA-256 hex digest of a token (never store raw tokens)."""
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def store_refresh_token(db: Session, user_id: int, token: str) -> RefreshToken:
+    """
+    Persist a refresh token hash so it can be revoked later.
+
+    Args:
+        db: Database session
+        user_id: Owner of the token
+        token: Raw refresh token JWT (only the hash is stored)
+
+    Returns:
+        Persisted RefreshToken record
+    """
+    expires_at = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    db_token = RefreshToken(
+        user_id=user_id,
+        token_hash=_hash_token(token),
+        expires_at=expires_at,
+    )
+    db.add(db_token)
+    db.commit()
+    return db_token
+
+
+def verify_refresh_token_in_db(db: Session, token: str) -> Optional[RefreshToken]:
+    """
+    Check that a refresh token exists in the DB, is not revoked, and has not expired.
+
+    Args:
+        db: Database session
+        token: Raw refresh token JWT
+
+    Returns:
+        RefreshToken record if valid, None otherwise
+    """
+    return (
+        db.query(RefreshToken)
+        .filter(
+            RefreshToken.token_hash == _hash_token(token),
+            RefreshToken.revoked.is_(False),
+            RefreshToken.expires_at > datetime.utcnow(),
+        )
+        .first()
+    )
+
+
+def revoke_refresh_token(db: Session, token: str) -> bool:
+    """
+    Revoke a refresh token so it can no longer be used.
+
+    Args:
+        db: Database session
+        token: Raw refresh token JWT
+
+    Returns:
+        True if the token was found and revoked, False if not found
+    """
+    db_token = db.query(RefreshToken).filter(RefreshToken.token_hash == _hash_token(token)).first()
+    if db_token:
+        db_token.revoked = True
+        db.commit()
+        return True
+    return False
 
 
 def get_or_create_user(
