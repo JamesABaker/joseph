@@ -12,7 +12,15 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.auth import create_access_token, create_refresh_token, get_or_create_user, verify_token
+from app.auth import (
+    create_access_token,
+    create_refresh_token,
+    get_or_create_user,
+    revoke_refresh_token,
+    store_refresh_token,
+    verify_refresh_token_in_db,
+    verify_token,
+)
 from app.config import settings
 from app.database import get_db
 from app.models import User
@@ -33,6 +41,12 @@ class TokenResponse(BaseModel):
 
 class RefreshRequest(BaseModel):
     """Request model for token refresh."""
+
+    refresh_token: str
+
+
+class LogoutRequest(BaseModel):
+    """Request model for logout."""
 
     refresh_token: str
 
@@ -101,6 +115,7 @@ async def oauth_callback(
         # Generate tokens
         access_token = create_access_token({"sub": str(user.id), "email": user.email})
         refresh_token = create_refresh_token({"sub": str(user.id)})
+        store_refresh_token(db, user.id, refresh_token)
 
         # Redirect to frontend with tokens in hash
         user_json = urllib.parse.quote(
@@ -176,13 +191,22 @@ async def refresh_access_token(
     """
     Refresh access token using refresh token.
 
+    Validates the token against the database (catches revoked tokens) then
+    rotates it — the old refresh token is revoked and a new one is issued.
+
     Args:
         request: Refresh token request
         db: Database session
     """
+    # Verify JWT signature and expiry
     payload = verify_token(request.refresh_token, token_type="refresh")  # nosec B106
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    # Verify token exists in DB and has not been revoked
+    db_token = verify_refresh_token_in_db(db, request.refresh_token)
+    if not db_token:
+        raise HTTPException(status_code=401, detail="Refresh token has been revoked or expired")
 
     user_id = int(payload.get("sub"))
     user = db.query(User).filter(User.id == user_id, User.is_active.is_(True)).first()
@@ -190,13 +214,16 @@ async def refresh_access_token(
     if not user:
         raise HTTPException(status_code=401, detail="User not found or inactive")
 
-    # Generate new tokens
+    # Rotate: revoke the old token before issuing a new one
+    revoke_refresh_token(db, request.refresh_token)
+
     access_token = create_access_token({"sub": str(user.id), "email": user.email})
-    refresh_token = create_refresh_token({"sub": str(user.id)})
+    new_refresh_token = create_refresh_token({"sub": str(user.id)})
+    store_refresh_token(db, user.id, new_refresh_token)
 
     return TokenResponse(
         access_token=access_token,
-        refresh_token=refresh_token,
+        refresh_token=new_refresh_token,
         user={
             "id": user.id,
             "email": user.email,
@@ -204,3 +231,18 @@ async def refresh_access_token(
             "picture": user.picture,
         },
     )
+
+
+@router.post("/logout", status_code=204)
+async def logout(
+    request: LogoutRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Revoke the provided refresh token, invalidating the session.
+
+    Args:
+        request: Logout request containing the refresh token
+        db: Database session
+    """
+    revoke_refresh_token(db, request.refresh_token)
